@@ -1,0 +1,12 @@
+Flask
+Flask-SQLAlchemy
+psycopg2-binary
+requests
+medsenger-api>=0.1.52
+flask_migrate
+Flask-Script
+sentry-sdk[flask]
+flask_httpauth
+marshmallow
+flask-marshmallow
+marshmallow-sqlalchemy

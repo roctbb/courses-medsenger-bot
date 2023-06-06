@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Редактор курсов</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz"
+            crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+<div id="app" class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <nav class="navbar bg-body-tertiary">
+                <div class="container-fluid">
+                    <span class="navbar-brand mb-0 h1">Редактор пациентских курсов</span>
+                </div>
+            </nav>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-3">
+            <ol class="list-group px-2 py-2">
+                <li class="list-group-item justify-content-between align-items-start" aria-current="true"
+                    v-for="course in courses"
+                    :class="{ active: selected_course && course.id === selected_course.id }"
+                    @click="selectCourse(course)">
+                    <div v-if="edited_course && course.id === edited_course.id">
+                        <div class="row px-0 py-0 gx-1">
+                            <div class="col-10 d-flex">
+                                <input v-model="course.title" type="text" class="form-control form-control-sm">
+                            </div>
+                            <div class="col-2">
+                                <button @click="saveCourse(course)" class="btn btn-sm btn-info col-12"><i
+                                        class="bi bi-check"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div v-else class="col-12 d-flex">
+                        <div class="ms-2 me-auto">
+                            {{ course.title }}
+                        </div>
+                        <a href="#" @click="editCourse(course)"><span class="badge bg-primary rounded-pill mx-1"><i
+                                class="bi bi-pencil-fill"></i></span></a>
+                        <a href="#" @click="askForCourseDeletion(course)"><span
+                                class="badge bg-primary rounded-pill mx-1"><i class="bi bi-x"></i></span></a>
+                    </div>
+                </li>
+            </ol>
+            <div class="row px-2 py-2 gx-1">
+                <div class="col-10">
+                    <input v-model="new_course_title" type="text" class="form-control">
+                </div>
+                <div class="col-2">
+                    <button @click="addCourse()" class="btn btn-info col-12"><i class="bi bi-plus"></i></button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <div class="col-md-9">
+
+    </div>
+</div>
+
+<script>
+    const {createApp} = Vue
+
+    createApp({
+        data() {
+            return {
+                courses: [],
+                selected_course: undefined,
+                edited_course: undefined,
+                endpoint: undefined,
+                new_course_title: "",
+            }
+        },
+        methods: {
+            setupEndpoint() {
+                this.endpoint = location.href + '/api'
+            },
+            loadCourses() {
+                self = this
+                fetch(this.endpoint + '/courses').then(response => response.json()).then(data => {
+                    self.courses = data
+                })
+            },
+            addCourse() {
+                self = this
+                fetch(this.endpoint + '/courses', {
+                    method: "POST",
+                    body: JSON.stringify({"title": this.new_course_title}),
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    }
+                }).then(response => response.json()).then(data => {
+                    self.courses.push(data)
+                    self.new_course_title = ""
+                })
+            },
+            saveCourse() {
+                self = this
+                fetch(this.endpoint + '/courses/' + this.edited_course.id, {
+                    method: "PUT",
+                    body: JSON.stringify({"title": this.edited_course.title}),
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    }
+                }).then(response => response.json()).then(data => {
+                    this.edited_course = undefined
+                })
+            },
+            selectCourse(course) {
+                this.selected_course = course
+            },
+            editCourse(course) {
+                this.edited_course = course
+            },
+            deleteCourse(course) {
+                self = this
+
+                fetch(this.endpoint + '/courses/' + course.id, {method: "DELETE"}).then(response => response.json()).then(data => {
+                    position = self.courses.indexOf(course)
+                    self.courses.splice(position, 1);
+                })
+            },
+            askForCourseDeletion(course) {
+                let result = confirm("Удалить курс " + course.title + "?");
+
+                if (result) {
+                    this.deleteCourse(course)
+                }
+            }
+        },
+        mounted() {
+            this.setupEndpoint()
+            this.loadCourses()
+        }
+    }).mount('#app')
+</script>
+</div>
+</body>
+</html>
