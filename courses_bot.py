@@ -178,14 +178,14 @@ def send_lesson(contract, lesson):
 
     for attachment in lesson.attachments:
         try:
-            if attachment.store_as_info:
+            if attachment.get('store_as_info'):
                 materials.append({
-                    "name": attachment.title,
-                    "link": attachment.url
+                    "name": attachment.get('title'),
+                    "link": attachment.get('url')
                 })
 
-            name = attachment.url.split('/')[-1]
-            data = requests.get(attachment.url).content
+            name = attachment.get('url').split('/')[-1]
+            data = requests.get(attachment.get('url')).content
 
             attachments.append(prepare_binary(name, data))
         except Exception as e:
@@ -194,7 +194,7 @@ def send_lesson(contract, lesson):
     medsenger_api.send_message(contract.id, lesson.text, only_patient=True, attachments=attachments)
 
     if materials:
-        medsenger_api.set_info_materials(contract.id, materials)
+        medsenger_api.set_info_materials(contract.id, json.dumps(materials))
 
     if lesson.tasks:
         medsenger_api.send_message(contract.id, "Ответьте на вопросы, чтобы получить баллы.", only_patient=True,
