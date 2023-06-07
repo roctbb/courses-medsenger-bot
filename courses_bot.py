@@ -1,7 +1,8 @@
+import requests
 from flask import redirect, send_file
 
 from manage import *
-from medsenger_api import AgentApiClient
+from medsenger_api import *
 from helpers import *
 from models import *
 from sqlalchemy import desc
@@ -44,6 +45,7 @@ def init(data):
     if not contract:
         contract = Contract(id=contract_id)
         db.session.add(contract)
+        db.session.commit()
     else:
         contract.active = True
 
@@ -53,7 +55,7 @@ def init(data):
         course = Course.query.filter_by(id=course_id).first()
 
         if course and course not in contract.courses:
-            contract.courses.append(course)
+            db.session.add(Enrollment(contract_id=contract.id, course_id=course.id))
 
     db.session.commit()
 
@@ -70,40 +72,11 @@ def remove(data):
     return "ok"
 
 
-@app.route('/order', methods=['POST'])
-@verify_json
-def order(data):
-    contract_id = data.get('contract_id')
-    if data['order'] == 'payment_done':
-        order = Order.query.filter_by(payment_id=data['params']['id']).first()
-
-        if order and not order.is_courses:
-            medsenger_api.send_message(contract_id, f"Поступила оплата услуги '{order.service.title}'.",
-                                       only_patient=True)
-            medsenger_api.send_message(contract_id, f"Поступила оплата услуги '{order.service.title}'.",
-                                       only_doctor=True)
-            order.is_courses = True
-
-            if order.service.order:
-
-                result = medsenger_api.send_order(contract_id, order.service.order, order.service.order_receiver,
-                                                  order.service.order_params)
-
-                if result['delivered']:
-                    order.is_delivered = True
-            else:
-                order.is_delivered = True
-
-            db.session.commit()
-            return "ok"
-    return "not found"
-
-
 # settings and views
 @app.route('/settings', methods=['GET'])
 @verify_args
 def get_settings(args, form):
-    return services()
+    return "Не требует настройки"
 
 
 @app.route('/settings', methods=['POST'])
@@ -173,8 +146,9 @@ def add_lesson(lesson, course_id, **kwargs):
         return jsonify(mesesage='Object not found'), 404
 
     db.session.add(lesson)
-    course.lessons.append(lesson)
+    db.session.commit()
 
+    course.lessons.append(lesson)
     db.session.commit()
 
     return schemas.lesson.dump(lesson)
@@ -196,6 +170,55 @@ def delete_lesson(course_id, id, **kwargs):
     db.session.delete(lesson)
     db.session.commit()
     return jsonify({'state': 'ok'})
+
+
+def send_lesson(contract, lesson):
+    attachments = []
+    materials = []
+
+    for attachment in lesson.attachments:
+        try:
+            if attachment.store_as_info:
+                materials.append({
+                    "name": attachment.title,
+                    "link": attachment.url
+                })
+
+            name = attachment.url.split('/')[-1]
+            data = requests.get(attachment.url).content
+
+            attachments.append(prepare_binary(name, data))
+        except Exception as e:
+            log(e, False)
+
+    medsenger_api.send_message(contract.id, lesson.text, only_patient=True, attachments=attachments)
+
+    if materials:
+        medsenger_api.set_info_materials(contract.id, materials)
+
+    if lesson.tasks:
+        medsenger_api.send_message(contract.id, "Ответьте на вопросы, чтобы получить баллы.", only_patient=True,
+                                   action_name="Ответить", action_link=f'tasks/{lesson.id}', action_onetime=True)
+
+    db.session.add(SentLesson(contract_id=contract.id, lesson_id=lesson.id))
+
+
+def send_messages(app):
+    with app.app_context():
+        contracts = Contract.query.filter_by(active=True).all()
+
+        for contract in contracts:
+            current_day = (datetime.now() - contract.created_on).days
+
+            for course in contract.courses:
+                actual_lessons = [lesson for lesson in
+                                  Lesson.query.filter_by(course_id=course.id, day=current_day).all() if
+                                  lesson not in contract.sent_lessons]
+
+                for lesson in actual_lessons:
+                    send_lesson(contract, lesson)
+
+        db.session.commit()
 
 
 if __name__ == "__main__":

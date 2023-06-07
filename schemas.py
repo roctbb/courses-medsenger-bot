@@ -20,6 +20,7 @@ class CourseSchema(ma.SQLAlchemySchema):
 
 class AttachmentSchema(ma.Schema):
     url = ma.Str(required=True)
+    title = ma.Str(required=False)
     store_as_info = ma.Boolean(required=True)
 
 
@@ -42,6 +43,7 @@ class LessonSchema(ma.SQLAlchemySchema):
     text = ma.auto_field(required=True)
     attachments = ma.List(ma.Nested(AttachmentSchema), required=True)
     tasks = ma.List(ma.Nested(TaskSchema), required=True)
+    day = ma.auto_field(required=True)
 
     @post_load
     def make(self, data, **kwargs):

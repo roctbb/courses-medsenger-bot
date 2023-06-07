@@ -3,27 +3,37 @@ from sqlalchemy.orm import backref
 
 db = SQLAlchemy()
 
-contract_course = db.Table('contract_course',
-                           db.Column('course_id', db.Integer, db.ForeignKey('course.id')),
-                           db.Column('contract_id', db.Integer, db.ForeignKey('contract.id')),
-                           db.Column('points', db.Integer, default=0),
-                           db.Column('created_on', db.DateTime, server_default=db.func.now())
-                           )
 
-contract_lesson = db.Table('contract_lesson',
-                           db.Column('lesson_id', db.Integer, db.ForeignKey('lesson.id')),
-                           db.Column('contract_id', db.Integer, db.ForeignKey('contract.id')),
-                           db.Column('created_on', db.DateTime, server_default=db.func.now())
-                           )
+class Enrollment(db.Model):
+    __tablename__ = 'contract_course'
+
+    id = db.Column(db.Integer, primary_key=True)
+    course_id = db.Column(db.Integer, db.ForeignKey('course.id', ondelete='CASCADE'))
+    contract_id = db.Column(db.Integer, db.ForeignKey('contract.id', ondelete='CASCADE'))
+    points = db.Column(db.Integer, default=0)
+    created_on = db.Column(db.DateTime, server_default=db.func.now())
+    updated_on = db.Column(db.DateTime, server_default=db.func.now(), server_onupdate=db.func.now())
+
+
+class SentLesson(db.Model):
+    __tablename__ = 'contract_lesson'
+
+    id = db.Column(db.Integer, primary_key=True)
+    lesson_id = db.Column(db.Integer, db.ForeignKey('lesson.id', ondelete='CASCADE'))
+    contract_id = db.Column(db.Integer, db.ForeignKey('contract.id', ondelete='CASCADE'))
+    created_on = db.Column(db.DateTime, server_default=db.func.now())
 
 
 class Contract(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     active = db.Column(db.Boolean, default=True)
-    courses = db.relationship('Course', secondary=contract_course, backref=backref('contract', uselist=False),
+    courses = db.relationship('Course', secondary='contract_course', backref=backref('contract', uselist=False),
                               lazy=True)
-    sent_lessons = db.relationship('Lesson', secondary=contract_lesson, backref=backref('contract', uselist=False),
+    sent_lessons = db.relationship('Lesson', secondary='contract_lesson', backref=backref('contract', uselist=False),
                                    lazy=True)
+
+    enrollments = db.relationship('Enrollment', backref=backref('contract', uselist=False),
+                                  lazy=True, viewonly=True)
 
     created_on = db.Column(db.DateTime, server_default=db.func.now())
     updated_on = db.Column(db.DateTime, server_default=db.func.now(), server_onupdate=db.func.now())
