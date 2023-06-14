@@ -1,9 +1,10 @@
 from marshmallow import post_load
 from marshmallow.validate import Length
-
-from models import *
-from manage import ma
+from flask_marshmallow import Marshmallow
+from .models import *
 import helpers
+
+ma = Marshmallow(app)
 
 
 class CourseSchema(ma.SQLAlchemySchema):
@@ -31,7 +32,7 @@ class VariantSchema(ma.Schema):
 
 class TaskSchema(ma.Schema):
     question = ma.Str(required=True)
-    variants = ma.List(ma.Nested(VariantSchema), required=True, validate=Length(2,10))
+    variants = ma.List(ma.Nested(VariantSchema), required=True, validate=Length(2, 10))
 
 
 class LessonSchema(ma.SQLAlchemySchema):
@@ -60,3 +61,6 @@ class Schemas:
     task = TaskSchema()
     attachment = AttachmentSchema()
     variant = VariantSchema()
+
+
+schemas = Schemas()

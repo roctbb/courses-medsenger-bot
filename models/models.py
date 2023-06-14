@@ -1,5 +1,7 @@
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import backref
+from manage import app
+from flask_migrate import Migrate
 
 db = SQLAlchemy()
 
@@ -14,6 +16,17 @@ class Enrollment(db.Model):
     created_on = db.Column(db.DateTime, server_default=db.func.now())
     updated_on = db.Column(db.DateTime, server_default=db.func.now(), server_onupdate=db.func.now())
 
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "points": self.points,
+            "enrolled_on": self.created_on.isoformat(),
+            "course": {
+                "title": self.course.title,
+                "id": self.course.id
+            }
+        }
+
 
 class SentLesson(db.Model):
     __tablename__ = 'contract_lesson'
@@ -27,13 +40,15 @@ class SentLesson(db.Model):
 class Contract(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     active = db.Column(db.Boolean, default=True)
-    courses = db.relationship('Course', secondary='contract_course', backref=backref('contract', uselist=False),
-                              lazy=True)
+
     sent_lessons = db.relationship('Lesson', secondary='contract_lesson', backref=backref('contract', uselist=False),
                                    lazy=True)
 
     enrollments = db.relationship('Enrollment', backref=backref('contract', uselist=False),
                                   lazy=True, viewonly=True)
+
+    courses = db.relationship('Course', secondary='contract_course', backref=backref('contracts', uselist=False),
+                              lazy=True, viewonly=True)
 
     created_on = db.Column(db.DateTime, server_default=db.func.now())
     updated_on = db.Column(db.DateTime, server_default=db.func.now(), server_onupdate=db.func.now())
@@ -45,6 +60,8 @@ class Course(db.Model):
     title = db.Column(db.String(1024), nullable=True)
     lessons = db.relationship('Lesson', backref=backref('course', uselist=False),
                               lazy=True)
+    enrollments = db.relationship('Enrollment', backref=backref('course', uselist=False),
+                                  lazy=True, viewonly=True)
 
     def to_dict(self):
         return {
@@ -73,3 +90,7 @@ class Lesson(db.Model):
             "tasks": self.tasks,
             "attachments": self.attachments
         }
+
+
+db.init_app(app)
+migrate = Migrate(app, db)

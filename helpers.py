@@ -125,3 +125,7 @@ def make(model, data):
             abort(make_response(jsonify(message="Object not found"), 404))
 
         return update(obj, data)
+
+
+def to_dict(L):
+    return [el.to_dict() for el in L]

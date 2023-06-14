@@ -1,397 +1,391 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Редактор курсов</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
-          integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
-            integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz"
-            crossorigin="anonymous"></script>
-    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-</head>
-<body>
-<div id="app" class="container-fluid">
-    <div class="row">
-        <div class="col-12">
-            <nav class="navbar bg-body-tertiary">
-                <div class="container-fluid">
-                    <span class="navbar-brand mb-0 h1">Редактор пациентских курсов</span>
-                </div>
-            </nav>
-        </div>
-    </div>
+{% extends 'base_vue.html' %}
 
-    <div class="row">
-        <div class="col-md-3">
-            <ol class="list-group px-2 py-2">
-                <li class="list-group-item justify-content-between align-items-start" aria-current="true"
-                    v-for="course in courses"
-                    :class="{ active: selected_course && course.id === selected_course.id }"
-                    @click="selectCourse(course)">
-                    <div v-if="edited_course && course.id === edited_course.id">
-                        <div class="row px-0 py-0 gx-1">
-                            <div class="col-10 d-flex">
-                                <input v-model="course.title" type="text" class="form-control form-control-sm">
-                            </div>
-                            <div class="col-2">
-                                <button @click="saveCourse(course)" class="btn btn-sm btn-info col-12"><i
-                                        class="bi bi-check"></i>
-                                </button>
+{% block title %}Редактор курсов{% endblock %}
+
+{% block content %}
+    {% raw %}
+    <div id="app" class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <nav class="navbar bg-body-tertiary">
+                    <div class="container-fluid">
+                        <span class="navbar-brand mb-0 h1">Редактор пациентских курсов</span>
+                    </div>
+                </nav>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-3">
+                <ol class="list-group px-2 py-2">
+                    <li class="list-group-item justify-content-between align-items-start" aria-current="true"
+                        v-for="course in courses"
+                        :class="{ active: selected_course && course.id === selected_course.id }"
+                        @click="selectCourse(course)">
+                        <div v-if="edited_course && course.id === edited_course.id">
+                            <div class="row px-0 py-0 gx-1">
+                                <div class="col-10 d-flex">
+                                    <input v-model="course.title" type="text" class="form-control form-control-sm">
+                                </div>
+                                <div class="col-2">
+                                    <button @click="saveCourse(course)" class="btn btn-sm btn-primary col-12"><i
+                                            class="bi bi-check"></i>
+                                    </button>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    <div v-else class="col-12 d-flex">
-                        <div class="ms-2 me-auto">
-                            {{ course.id }}. {{ course.title }}
+                        <div v-else class="col-12 d-flex">
+                            <div class="ms-2 me-auto">
+                                {{ course.id }}. {{ course.title }}
+                            </div>
+                            <a href="#" @click="editCourse(course)"><span class="badge bg-primary rounded-pill mx-1"><i
+                                    class="bi bi-pencil-fill"></i></span></a>
+                            <a href="#" @click="askForCourseDeletion(course)"><span
+                                    class="badge bg-primary rounded-pill mx-1"><i class="bi bi-x"></i></span></a>
                         </div>
-                        <a href="#" @click="editCourse(course)"><span class="badge bg-primary rounded-pill mx-1"><i
-                                class="bi bi-pencil-fill"></i></span></a>
-                        <a href="#" @click="askForCourseDeletion(course)"><span
-                                class="badge bg-primary rounded-pill mx-1"><i class="bi bi-x"></i></span></a>
+                    </li>
+                </ol>
+                <div class="row px-2 py-2 gx-1">
+                    <div class="col-10">
+                        <input v-model="new_course_title" type="text" class="form-control">
                     </div>
-                </li>
-            </ol>
-            <div class="row px-2 py-2 gx-1">
-                <div class="col-10">
-                    <input v-model="new_course_title" type="text" class="form-control">
+                    <div class="col-2">
+                        <button @click="addCourse()" class="btn btn-primary col-12"><i class="bi bi-plus"></i></button>
+                    </div>
                 </div>
-                <div class="col-2">
-                    <button @click="addCourse()" class="btn btn-info col-12"><i class="bi bi-plus"></i></button>
+
+            </div>
+            <div class="col-md-9">
+                <div class="alert alert-warning my-2" v-if="error">
+                    {{ error }}
                 </div>
-            </div>
 
-        </div>
-        <div class="col-md-9">
-            <div class="alert alert-warning my-2" v-if="error">
-                {{ error }}
-            </div>
-
-            <div class="accordion py-2" id="lessons" v-if="selected_course">
-                <div class="accordion-item" v-for="(lesson, i) in lessons">
-                    <h2 class="accordion-header">
-                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                                :data-bs-target="'#lesson' + i" aria-expanded="false" :aria-controls="'lesson' + i">
-                            {{ lesson.title }}
-                        </button>
-                    </h2>
-                    <div :id="'lesson' + i" class="accordion-collapse collapse" data-bs-parent="#lessons">
-                        <div class="accordion-body">
-                            <h6>Информационное сообщение</h6>
-                            <div class="mb-3">
-                                <label class="form-label form-label-sm">Название</label>
-                                <input type="text" class="form-control" v-model="lesson.title">
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label form-label-sm">Текст</label>
-                                <textarea class="form-control" rows="5" v-model="lesson.text"></textarea>
-                            </div>
-
-                            <div class="mb-3">
-                                <label class="form-label form-label-sm">День отправки</label>
-                                <input type="number" class="form-control" v-model="lesson.day">
-                            </div>
-
-                            <h6>Вложения</h6>
-
-                            <div class="row g-3 align-items-center py-1" v-for="attachment in lesson.attachments">
-                                <div class="col-auto">
-                                    <label class="col-form-label col-form-label-sm">URL</label>
+                <div class="accordion py-2" id="lessons" v-if="selected_course">
+                    <div class="accordion-item" v-for="(lesson, i) in lessons">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                    :data-bs-target="'#lesson' + i" aria-expanded="false" :aria-controls="'lesson' + i">
+                                {{ lesson.title }}
+                            </button>
+                        </h2>
+                        <div :id="'lesson' + i" class="accordion-collapse collapse" data-bs-parent="#lessons">
+                            <div class="accordion-body">
+                                <h6>Информационное сообщение</h6>
+                                <div class="mb-3">
+                                    <label class="form-label form-label-sm">Название</label>
+                                    <input type="text" class="form-control" v-model="lesson.title">
                                 </div>
-                                <div class="col-auto">
-                                    <input type="text" class="form-control form-control-sm" v-model="attachment.url">
+                                <div class="mb-3">
+                                    <label class="form-label form-label-sm">Текст</label>
+                                    <textarea class="form-control" rows="5" v-model="lesson.text"></textarea>
                                 </div>
-                                <div class="col-auto">
-                                    <label class="col-form-label col-form-label-sm">Название</label>
-                                </div>
-                                <div class="col-auto">
-                                    <input type="text" class="form-control form-control-sm" v-model="attachment.title">
-                                </div>
-                                <div class="col-auto">
-                                    <label class="col-form-label col-form-label-sm">Закрепить?</label>
-                                </div>
-                                <div class="col-auto">
-                                    <input type="checkbox" v-model="attachment.store_as_info">
-                                </div>
-                                <div class="col-auto">
-                                    <a href="#" @click="askForAttachmentDeletion(lesson, attachment)"><span
-                                            class="badge bg-primary rounded-pill mx-1"><i
-                                            class="bi bi-x"></i></span></a>
-                                </div>
-                            </div>
-                            <div v-if="lesson.attachments.length === 0" class="px-1">Вложений не добавлено</div>
 
-                            <a href="#" @click="addAttachment(lesson)"><span
-                                    class="badge bg-primary rounded-pill mx-1 my-2"><i
-                                    class="bi bi-plus"></i></span></a>
+                                <div class="mb-3">
+                                    <label class="form-label form-label-sm">День отправки</label>
+                                    <input type="number" class="form-control" v-model="lesson.day">
+                                </div>
 
-                            <h6>Вопросы</h6>
+                                <h6>Вложения</h6>
 
-                            <div class="accordion" :id="'lesson' + i + '_tasks'">
-                                <div class="accordion-item" v-for="(task, j) in lesson.tasks">
-                                    <h2 class="accordion-header">
-                                        <button class="accordion-button p-2" type="button" data-bs-toggle="collapse"
-                                                :data-bs-target="'#lesson' + i + '_task' + j" aria-expanded="true"
-                                                :aria-controls="'lesson' + i + '_task' + j">
-                                            <small>{{ task.question }}</small>
-                                        </button>
-                                    </h2>
-                                    <div :id="'lesson' + i + '_task' + j" class="accordion-collapse collapse show"
-                                         :data-bs-parent="'#lesson' + i + '_tasks'">
-                                        <div class="accordion-body">
-                                            <div class="mb-3">
-                                                <small class="form-label form-label-sm">Текст вопроса</small>
-                                                <input type="text" class="form-control" v-model="task.question">
-                                            </div>
+                                <div class="row g-3 align-items-center py-1" v-for="attachment in lesson.attachments">
+                                    <div class="col-auto">
+                                        <label class="col-form-label col-form-label-sm">URL</label>
+                                    </div>
+                                    <div class="col-auto">
+                                        <input type="text" class="form-control form-control-sm"
+                                               v-model="attachment.url">
+                                    </div>
+                                    <div class="col-auto">
+                                        <label class="col-form-label col-form-label-sm">Название</label>
+                                    </div>
+                                    <div class="col-auto">
+                                        <input type="text" class="form-control form-control-sm"
+                                               v-model="attachment.title">
+                                    </div>
+                                    <div class="col-auto">
+                                        <label class="col-form-label col-form-label-sm">Закрепить?</label>
+                                    </div>
+                                    <div class="col-auto">
+                                        <input type="checkbox" v-model="attachment.store_as_info">
+                                    </div>
+                                    <div class="col-auto">
+                                        <a href="#" @click="askForAttachmentDeletion(lesson, attachment)"><span
+                                                class="badge bg-primary rounded-pill mx-1"><i
+                                                class="bi bi-x"></i></span></a>
+                                    </div>
+                                </div>
+                                <div v-if="lesson.attachments.length === 0" class="px-1">Вложений не добавлено</div>
 
-                                            <small>Варианты ответа</small>
+                                <a href="#" @click="addAttachment(lesson)"><span
+                                        class="badge bg-primary rounded-pill mx-1 my-2"><i
+                                        class="bi bi-plus"></i></span></a>
 
-                                            <div class="row g-3 align-items-center py-1"
-                                                 v-for="variant in task.variants">
-                                                <div class="col-auto">
-                                                    <label class="col-form-label col-form-label-sm">Ответ</label>
+                                <h6>Вопросы</h6>
+
+                                <div class="accordion" :id="'lesson' + i + '_tasks'">
+                                    <div class="accordion-item" v-for="(task, j) in lesson.tasks">
+                                        <h2 class="accordion-header">
+                                            <button class="accordion-button p-2" type="button" data-bs-toggle="collapse"
+                                                    :data-bs-target="'#lesson' + i + '_task' + j" aria-expanded="true"
+                                                    :aria-controls="'lesson' + i + '_task' + j">
+                                                <small>{{ task.question }}</small>
+                                            </button>
+                                        </h2>
+                                        <div :id="'lesson' + i + '_task' + j" class="accordion-collapse collapse show"
+                                             :data-bs-parent="'#lesson' + i + '_tasks'">
+                                            <div class="accordion-body">
+                                                <div class="mb-3">
+                                                    <small class="form-label form-label-sm">Текст вопроса</small>
+                                                    <input type="text" class="form-control" v-model="task.question">
                                                 </div>
-                                                <div class="col-auto">
-                                                    <input type="text" class="form-control form-control-sm"
-                                                           v-model="variant.text">
-                                                </div>
-                                                <div class="col-auto">
-                                                    <label class="col-form-label col-form-label-sm">Баллы</label>
-                                                </div>
-                                                <div class="col-auto">
-                                                    <input type="number" class="form-control form-control-sm"
-                                                           v-model="variant.points">
-                                                </div>
-                                                <div class="col-auto">
-                                                    <a href="#"
-                                                       @click="askForVariantDeletion(task, variant)"><span
-                                                            class="badge bg-primary rounded-pill mx-1"><i
-                                                            class="bi bi-x"></i></span></a>
-                                                </div>
-                                            </div>
 
-                                            <div><a href="#" @click="addVariant(task)"><span
-                                                    class="badge bg-primary rounded-pill mx-1 my-2"><i
-                                                    class="bi bi-plus"></i></span></a>
-                                                <a href="#" @click="askForTaskDeletion(lesson, task)"><span
+                                                <small>Варианты ответа</small>
+
+                                                <div class="row g-3 align-items-center py-1"
+                                                     v-for="variant in task.variants">
+                                                    <div class="col-auto">
+                                                        <label class="col-form-label col-form-label-sm">Ответ</label>
+                                                    </div>
+                                                    <div class="col-auto">
+                                                        <input type="text" class="form-control form-control-sm"
+                                                               v-model="variant.text">
+                                                    </div>
+                                                    <div class="col-auto">
+                                                        <label class="col-form-label col-form-label-sm">Баллы</label>
+                                                    </div>
+                                                    <div class="col-auto">
+                                                        <input type="number" class="form-control form-control-sm"
+                                                               v-model="variant.points">
+                                                    </div>
+                                                    <div class="col-auto">
+                                                        <a href="#"
+                                                           @click="askForVariantDeletion(task, variant)"><span
+                                                                class="badge bg-primary rounded-pill mx-1"><i
+                                                                class="bi bi-x"></i></span></a>
+                                                    </div>
+                                                </div>
+
+                                                <div><a href="#" @click="addVariant(task)"><span
                                                         class="badge bg-primary rounded-pill mx-1 my-2"><i
-                                                        class="bi bi-x"></i></span></a></div>
+                                                        class="bi bi-plus"></i></span></a>
+                                                    <a href="#" @click="askForTaskDeletion(lesson, task)"><span
+                                                            class="badge bg-primary rounded-pill mx-1 my-2"><i
+                                                            class="bi bi-x"></i></span></a></div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
+                                <div v-if="lesson.tasks.length === 0" class="px-1">Вопросов не добавлено</div>
+
+                                <a href="#" @click="addTask(lesson)"><span
+                                        class="badge bg-primary rounded-pill mx-1 my-2"><i
+                                        class="bi bi-plus"></i></span></a>
+                                <a href="#" @click="askForLessonDeletion(lesson)"><span
+                                        class="badge bg-primary rounded-pill mx-1 my-2"><i
+                                        class="bi bi-x"></i></span></a>
+
+
                             </div>
-                            <div v-if="lesson.tasks.length === 0" class="px-1">Вопросов не добавлено</div>
-
-                            <a href="#" @click="addTask(lesson)"><span
-                                    class="badge bg-primary rounded-pill mx-1 my-2"><i
-                                    class="bi bi-plus"></i></span></a>
-                            <a href="#" @click="askForLessonDeletion(lesson)"><span
-                                    class="badge bg-primary rounded-pill mx-1 my-2"><i
-                                    class="bi bi-x"></i></span></a>
-
-
                         </div>
                     </div>
+
+                    <button @click="addLesson()" class="btn btn-primary btn-sm mx-1 my-2">Добавить урок</button>
+                    <button @click="saveAll()" class="btn btn-success btn-sm mx-1 my-2">Сохранить</button>
                 </div>
 
-                <button @click="addLesson()" class="btn btn-info btn-sm mx-1 my-2">Добавить урок</button>
-                <button @click="saveAll()" class="btn btn-success btn-sm mx-1 my-2">Сохранить</button>
+
             </div>
-
-
         </div>
+
     </div>
+    {% endraw %}
+    <script>
+        const {createApp} = Vue
 
-</div>
-
-<script>
-    const {createApp} = Vue
-
-    createApp({
-        data() {
-            return {
-                courses: [],
-                selected_course: undefined,
-                edited_course: undefined,
-                endpoint: undefined,
-                new_course_title: "",
-                lessons: [],
-                error: ""
-            }
-        },
-        methods: {
-            setupEndpoint() {
-                this.endpoint = window.location.protocol + '//' + window.location.host + '/editor/api'
-            },
-            loadCourses() {
-                self = this
-                fetch(this.endpoint + '/courses').then(response => response.json()).then(data => {
-                    self.courses = data
-                })
-            },
-            addCourse() {
-                self = this
-                fetch(this.endpoint + '/courses', {
-                    method: "POST",
-                    body: JSON.stringify({"title": this.new_course_title}),
-                    headers: {
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json'
-                    }
-                }).then(response => response.json()).then(data => {
-                    self.courses.push(data)
-                    self.new_course_title = ""
-                })
-            },
-            saveCourse() {
-                self = this
-                fetch(this.endpoint + '/courses/' + this.edited_course.id, {
-                    method: "PUT",
-                    body: JSON.stringify({"title": this.edited_course.title}),
-                    headers: {
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json'
-                    }
-                }).then(response => response.json()).then(data => {
-                    this.edited_course = undefined
-                })
-            },
-            selectCourse(course) {
-                self = this
-                fetch(this.endpoint + '/courses/' + course.id + '/lessons').then(response => response.json()).then(data => {
-                    self.lessons = data
-                    self.selected_course = course
-                })
-
-            },
-            editCourse(course) {
-                this.edited_course = course
-            },
-            deleteCourse(course) {
-                self = this
-
-                fetch(this.endpoint + '/courses/' + course.id, {method: "DELETE"}).then(response => response.json()).then(data => {
-                    position = self.courses.indexOf(course)
-                    self.courses.splice(position, 1);
-                })
-            },
-            askForCourseDeletion(course) {
-                let result = confirm("Удалить курс " + course.title + "?");
-
-                if (result) {
-                    this.deleteCourse(course)
+        createApp({
+            data() {
+                return {
+                    courses: [],
+                    selected_course: undefined,
+                    edited_course: undefined,
+                    endpoint: undefined,
+                    new_course_title: "",
+                    lessons: [],
+                    error: ""
                 }
             },
-            addLesson() {
-                this.lessons.push({tasks: [], attachments: []})
-            },
-            askForLessonDeletion(lesson) {
-                let result = confirm("Удалить урок " + lesson.title + "?");
+            methods: {
+                setupEndpoint() {
+                    this.endpoint = window.location.protocol + '//' + window.location.host + '/editor/api'
+                },
+                loadCourses() {
+                    self = this
+                    fetch(this.endpoint + '/courses').then(response => response.json()).then(data => {
+                        self.courses = data
+                    })
+                },
+                addCourse() {
+                    self = this
+                    fetch(this.endpoint + '/courses', {
+                        method: "POST",
+                        body: JSON.stringify({"title": this.new_course_title}),
+                        headers: {
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json'
+                        }
+                    }).then(response => response.json()).then(data => {
+                        self.courses.push(data)
+                        self.new_course_title = ""
+                    })
+                },
+                saveCourse() {
+                    self = this
+                    fetch(this.endpoint + '/courses/' + this.edited_course.id, {
+                        method: "PUT",
+                        body: JSON.stringify({"title": this.edited_course.title}),
+                        headers: {
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json'
+                        }
+                    }).then(response => response.json()).then(data => {
+                        this.edited_course = undefined
+                    })
+                },
+                selectCourse(course) {
+                    self = this
+                    fetch(this.endpoint + '/courses/' + course.id + '/lessons').then(response => response.json()).then(data => {
+                        self.lessons = data
+                        self.selected_course = course
+                    })
 
-                if (result) {
-                    position = this.lessons.indexOf(lesson)
-                    this.lessons.splice(position, 1);
-                }
-            },
-            addAttachment(lesson) {
-                lesson.attachments.push({})
-            },
-            askForAttachmentDeletion(lesson, attachment) {
-                let result = confirm("Удалить вложение?");
+                },
+                editCourse(course) {
+                    this.edited_course = course
+                },
+                deleteCourse(course) {
+                    self = this
 
-                if (result) {
-                    position = lesson.attachments.indexOf(attachment)
-                    lesson.attachments.splice(position, 1);
-                }
-            },
-            addTask(lesson) {
-                lesson.tasks.push({variants: [{}, {}]})
-            },
-            askForTaskDeletion(lesson, task) {
-                let result = confirm("Удалить вопрос?");
-
-                if (result) {
-                    position = lesson.tasks.indexOf(task)
-                    lesson.tasks.splice(position, 1);
-                }
-            },
-            addVariant(task) {
-                task.variants.push({})
-            },
-            askForVariantDeletion(task, variant) {
-                if (task.variants.length === 2) {
-                    alert("В вопросе не может быть меньше двух вариантов ответа")
-                } else {
-                    let result = confirm("Удалить ответ?");
+                    fetch(this.endpoint + '/courses/' + course.id, {method: "DELETE"}).then(response => response.json()).then(data => {
+                        position = self.courses.indexOf(course)
+                        self.courses.splice(position, 1);
+                    })
+                },
+                askForCourseDeletion(course) {
+                    let result = confirm("Удалить курс " + course.title + "?");
 
                     if (result) {
-                        position = task.variants.indexOf(variant)
-                        task.variants.splice(position, 1);
+                        this.deleteCourse(course)
+                    }
+                },
+                addLesson() {
+                    this.lessons.push({tasks: [], attachments: []})
+                },
+                askForLessonDeletion(lesson) {
+                    let result = confirm("Удалить урок " + lesson.title + "?");
+
+                    if (result) {
+                        position = this.lessons.indexOf(lesson)
+                        this.lessons.splice(position, 1);
+                    }
+                },
+                addAttachment(lesson) {
+                    lesson.attachments.push({})
+                },
+                askForAttachmentDeletion(lesson, attachment) {
+                    let result = confirm("Удалить вложение?");
+
+                    if (result) {
+                        position = lesson.attachments.indexOf(attachment)
+                        lesson.attachments.splice(position, 1);
+                    }
+                },
+                addTask(lesson) {
+                    lesson.tasks.push({variants: [{}, {}]})
+                },
+                askForTaskDeletion(lesson, task) {
+                    let result = confirm("Удалить вопрос?");
+
+                    if (result) {
+                        position = lesson.tasks.indexOf(task)
+                        lesson.tasks.splice(position, 1);
+                    }
+                },
+                addVariant(task) {
+                    task.variants.push({})
+                },
+                askForVariantDeletion(task, variant) {
+                    if (task.variants.length === 2) {
+                        alert("В вопросе не может быть меньше двух вариантов ответа")
+                    } else {
+                        let result = confirm("Удалить ответ?");
+
+                        if (result) {
+                            position = task.variants.indexOf(variant)
+                            task.variants.splice(position, 1);
+                        }
+                    }
+
+                },
+                async saveAll() {
+                    for (let lesson of this.lessons) {
+                        if (!(await this.save(lesson))) {
+                            return false
+                        }
+                    }
+                    alert("Изменения сохранены!")
+                },
+                async save(lesson) {
+                    if (lesson.id) {
+                        return await this.updateLesson(lesson)
+                    } else {
+                        return await this.postLesson(lesson)
+                    }
+                },
+                async postLesson(lesson) {
+                    let response = await fetch(this.endpoint + '/courses/' + this.selected_course.id + '/lessons', {
+                        method: "POST",
+                        body: JSON.stringify(lesson),
+                        headers: {
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json'
+                        }
+                    })
+
+                    if (response.status === 200) {
+                        let data = await response.json()
+                        lesson.id = data.id
+                        return true
+                    } else {
+                        let data = await response.text()
+                        alert(data)
+                        return false
+                    }
+                },
+                async updateLesson(lesson) {
+                    let response = await fetch(this.endpoint + '/courses/' + this.selected_course.id + '/lessons/' + lesson.id, {
+                        method: "PUT",
+                        body: JSON.stringify(lesson),
+                        headers: {
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json'
+                        }
+                    })
+
+                    if (response.status === 200) {
+                        let data = await response.json()
+                        lesson.id = data.id
+                        return true
+                    } else {
+                        let data = await response.text()
+                        alert(data)
+                        return false
                     }
                 }
-
             },
-            saveAll() {
-                this.lessons.forEach(lesson => this.save(lesson))
-            },
-            save(lesson) {
-                if (lesson.id) {
-                    this.updateLesson(lesson)
-                } else {
-                    this.postLesson(lesson)
-                }
-            },
-            postLesson(lesson) {
-                self = this
-                fetch(this.endpoint + '/courses/' + this.selected_course.id + '/lessons', {
-                    method: "POST",
-                    body: JSON.stringify(lesson),
-                    headers: {
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json'
-                    }
-                }).then(response => {
-                    if (response.status == 200) {
-                        response.json().then(data => {
-                            lesson.id = data.id
-                        })
-                    } else {
-                        response.text().then(data => {
-                            alert(data)
-                        })
-                    }
-
-                })
-            },
-            updateLesson(lesson) {
-                self = this
-                fetch(this.endpoint + '/courses/' + this.selected_course.id + '/lessons/' + lesson.id, {
-                    method: "PUT",
-                    body: JSON.stringify(lesson),
-                    headers: {
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json'
-                    }
-                }).then(response => {
-                    if (response.status == 200) {
-                        response.json().then(data => {
-                            lesson.id = data.id
-                        })
-                    } else {
-                        response.text().then(data => {
-                            alert(data)
-                        })
-                    }
-                })
+            mounted() {
+                this.setupEndpoint()
+                this.loadCourses()
             }
-        },
-        mounted() {
-            this.setupEndpoint()
-            this.loadCourses()
-        }
-    }).mount('#app')
-</script>
-</body>
-</html>
+        }).mount('#app')
+    </script>
+{% endblock %}
