@@ -38,11 +38,11 @@
                                         <ul>
                                             {% for attachment in lesson.attachments %}
                                                 {% if attachment.title %}
-                                                    <li><a href="{{ attachment.url }}">{{ attachment.title }}</a>
+                                                    <li><a target="_blank" href="{{ attachment.url }}">{{ attachment.title }}</a>
                                                         {% if attachment.store_as_info %}<i>(сохранится
                                                             в списке материалов)</i>{% endif %}</li>
                                                 {% else %}
-                                                    <li><a href="{{ attachment.url }}">{{ attachment.url }}</a></li>
+                                                    <li><a target="_blank" href="{{ attachment.url }}">{{ attachment.url }}</a></li>
                                                 {% endif %}
                                             {% endfor %}
                                         </ul>

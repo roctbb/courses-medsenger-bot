@@ -62,6 +62,39 @@ def preview(id):
     return render_template("preview.html", course=course)
 
 
+@medsenger_blueprint.route('/tasks/<int:lesson_id>', methods=['GET'])
+@verify_args
+def tasks(args, form, lesson_id):
+    lesson = Lesson.query.get_or_404(lesson_id)
+    return render_template("tasks.html", lesson=lesson)
+
+
+@medsenger_blueprint.route('/tasks/<int:lesson_id>', methods=['POST'])
+@verify_args
+def send_tasks(args, form, lesson_id):
+    lesson = Lesson.query.get_or_404(lesson_id)
+    contract_id = args.get('contract_id')
+
+    enrollment = Enrollment.query.filter_by(course_id=lesson.course_id, contract_id=contract_id).first()
+
+    if not enrollment:
+        abort(404)
+
+    for i, task in enumerate(lesson.tasks):
+        answer = form.get(f'question_{i}')
+
+        if answer is not None and answer.isnumeric():
+            answer = int(answer)
+
+            if answer >= 0 and answer < len(task['variants']):
+                variant = task['variants'][answer]
+                enrollment.points += variant['points']
+
+    db.session.commit()
+
+    return render_template("done.html", )
+
+
 @medsenger_blueprint.route('/settings', methods=['GET'])
 @verify_args
 def get_settings(args, form):

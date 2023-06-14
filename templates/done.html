@@ -1,0 +1,20 @@
+{% extends "base_vue.html" %}
+{% block title %}Платные услуги{% endblock %}
+{% block content %}
+    <h3 style="text-align: center; margin-bottom: 15px;">Тест заполнен</h3>
+
+    <p style="text-align: center;"><img src="https://common.medsenger.ru/images/icons8-ok-128.png"/></p>
+
+    <p style="text-align: center">
+        <small>Окно закроется автоматически через секунду.</small>
+    </p>
+
+    <script>
+        setTimeout(function () {
+            window.parent.postMessage('close-modal-success', '*');
+            window.close();
+        }, 1000)
+
+    </script>
+
+{% endblock %}
