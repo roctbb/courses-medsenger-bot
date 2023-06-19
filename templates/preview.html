@@ -34,7 +34,7 @@
                                 <div class="accordion-body">
                                     <h6>Текст сообщения</h6>
 
-                                    <p>{{ lesson.text | safe }}</p>
+                                    <p>{{ lesson.text | replace('\n', '<br>') | safe }}</p>
 
                                     {% if lesson.attachments %}
                                         <h6>Вложения</h6>
