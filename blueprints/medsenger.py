@@ -34,13 +34,14 @@ def init(data):
     else:
         contract.active = True
 
-    course_ids = request.json.get('params', {}).get('courses', '').split(',')
+    course_ids = request.json.get('params', {}).get('courses')
 
-    for course_id in course_ids:
-        course = Course.query.filter_by(id=course_id).first()
+    if course_ids:
+        for course_id in course_ids.split(','):
+            course = Course.query.filter_by(id=course_id).first()
 
-        if course and course not in contract.courses:
-            db.session.add(Enrollment(contract_id=contract.id, course_id=course.id))
+            if course and course not in contract.courses:
+                db.session.add(Enrollment(contract_id=contract.id, course_id=course.id))
 
     db.session.commit()
 
