@@ -1,4 +1,6 @@
 import json
+import time
+
 from flask import Blueprint
 from models.schemas import *
 from helpers import *
@@ -80,6 +82,8 @@ def send_tasks(args, form, lesson_id):
     if not enrollment:
         abort(404)
 
+    points = 0
+
     for i, task in enumerate(lesson.tasks):
         answer = form.get(f'question_{i}')
 
@@ -88,11 +92,16 @@ def send_tasks(args, form, lesson_id):
 
             if answer >= 0 and answer < len(task['variants']):
                 variant = task['variants'][answer]
-                enrollment.points += variant['points']
+                points += variant['points']
 
+    enrollment.points += points
     db.session.commit()
 
-    return render_template("done.html", )
+    medsenger_api.send_message(contract_id,
+                               "Спасибо за заполнение теста! Вы заработали {points} новых баллов, теперь у Вас {enrollment.points} баллов!",
+                               action_deadline=int(time.time()) + 60 * 60 * 3, only_patient=True)
+
+    return render_template("done.html")
 
 
 @medsenger_blueprint.route('/settings', methods=['GET'])

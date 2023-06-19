@@ -13,6 +13,7 @@
             <div class="card">
                 <div class="card-body">
                     <h6 class="card-title">{{ enrollment.course.title }}</h6>
+                    <p>Набрано баллов: {{ enrollment.points }}</p>
                     <a :href="previewUrl(enrollment.course)" target="_blank" class="btn btn-sm btn-primary mr-1 my-1">Посмотреть</a>
                     <form method="post" style="display: inline;">
                         <input type="hidden" name="action_type" value="remove_course">

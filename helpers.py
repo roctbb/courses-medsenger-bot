@@ -4,6 +4,8 @@ from datetime import datetime
 
 import werkzeug
 from flask import request, abort, jsonify, render_template, make_response
+from medsenger_api import AgentApiClient
+
 from config import *
 import sys, os
 
@@ -129,3 +131,5 @@ def make(model, data):
 
 def to_dict(L):
     return [el.to_dict() for el in L]
+
+medsenger_api = AgentApiClient(API_KEY, MAIN_HOST, AGENT_ID, API_DEBUG)

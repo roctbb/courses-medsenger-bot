@@ -4,8 +4,6 @@ from helpers import *
 from models.models import *
 import requests
 
-medsenger_api = AgentApiClient(API_KEY, MAIN_HOST, AGENT_ID, API_DEBUG)
-
 
 def send_lesson(contract, lesson):
     attachments = []
