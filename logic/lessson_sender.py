@@ -5,7 +5,7 @@ from models.models import *
 import requests
 
 
-def send_lesson(contract, lesson):
+def send_lesson(contract, lesson, with_test=True):
     attachments = []
     materials = []
 
@@ -29,7 +29,7 @@ def send_lesson(contract, lesson):
     if materials:
         medsenger_api.set_info_materials(contract.id, json.dumps(materials))
 
-    if lesson.tasks:
+    if lesson.tasks and with_test:
         medsenger_api.send_message(contract.id, "Ответьте на вопросы, чтобы получить баллы.", only_patient=True,
                                    action_name="Ответить", action_link=f'tasks/{lesson.id}', action_onetime=True)
 

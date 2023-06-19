@@ -2,6 +2,8 @@ import json
 import time
 
 from flask import Blueprint
+
+from logic.lessson_sender import send_lesson
 from models.schemas import *
 from helpers import *
 from config import *
@@ -60,9 +62,37 @@ def remove(data):
 
 # settings and views
 @medsenger_blueprint.route('/preview/<int:id>', methods=['GET'])
-def preview(id):
+@has_token
+def preview(args, form, id):
+    contract = Contract.query.filter_by(doctor_agent_token=args.get('agent_token')).first()
+
+    if not contract:
+        abort(401)
+
     course = Course.query.get_or_404(id)
     return render_template("preview.html", course=course)
+
+
+@medsenger_blueprint.route('/preview/<int:id>', methods=['POST'])
+@has_token
+def force_send(args, form, id):
+    contract = Contract.query.filter_by(doctor_agent_token=args.get('agent_token')).first()
+
+    if not contract:
+        abort(401)
+
+    lesson_id = form.get('lesson_id')
+    course = Course.query.get_or_404(id)
+    lesson = Lesson.query.get_or_404(lesson_id)
+
+    if course in contract.courses:
+        with_test = True
+    else:
+        with_test = False
+
+    send_lesson(contract, lesson, with_test)
+
+    return render_template("preview.html", course=course, message="Сообщение отправлено!")
 
 
 @medsenger_blueprint.route('/tasks/<int:lesson_id>', methods=['GET'])
@@ -135,7 +165,7 @@ def get_contract_courses(args, form):
     courses = [{"id": c.id, "title": c.title} for c in Course.query.all()]
 
     return render_template('settings.html', enrollments_json=json.dumps(to_dict(contract.enrollments)),
-                           courses_json=json.dumps(courses), api_host=API_HOST)
+                           courses_json=json.dumps(courses), api_host=API_HOST, agent_token=contract.get_doctor_token())
 
 
 def save_contract_courses(args, form):

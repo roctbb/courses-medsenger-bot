@@ -60,6 +60,21 @@ def only_doctor_args(func):
     return wrapper
 
 
+def has_token(func):
+    def wrapper(*args, **kargs):
+        if not request.args.get('agent_token'):
+            abort(401)
+
+        try:
+            return func(request.args, request.form, *args, **kargs)
+        except Exception as e:
+            log(e, True)
+            abort(500)
+
+    wrapper.__name__ = func.__name__
+    return wrapper
+
+
 def verify_json(func):
     def wrapper(*args, **kargs):
         if not request.json.get('contract_id') and "status" not in request.url:
@@ -131,5 +146,6 @@ def make(model, data):
 
 def to_dict(L):
     return [el.to_dict() for el in L]
+
 
 medsenger_api = AgentApiClient(API_KEY, MAIN_HOST, AGENT_ID, API_DEBUG)

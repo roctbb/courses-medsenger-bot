@@ -17,6 +17,10 @@
 
         <div class="row">
             <div class="col-md-12">
+                {% if message %}
+                    <div class="alert alert-success my-2">{{ message }}</div>
+                {% endif %}
+
                 <div class="accordion py-2" id="lessons">
                     {% for lesson in course.lessons %}
                         <div class="accordion-item">
@@ -38,11 +42,13 @@
                                         <ul>
                                             {% for attachment in lesson.attachments %}
                                                 {% if attachment.title %}
-                                                    <li><a target="_blank" href="{{ attachment.url }}">{{ attachment.title }}</a>
+                                                    <li><a target="_blank"
+                                                           href="{{ attachment.url }}">{{ attachment.title }}</a>
                                                         {% if attachment.store_as_info %}<i>(сохранится
                                                             в списке материалов)</i>{% endif %}</li>
                                                 {% else %}
-                                                    <li><a target="_blank" href="{{ attachment.url }}">{{ attachment.url }}</a></li>
+                                                    <li><a target="_blank"
+                                                           href="{{ attachment.url }}">{{ attachment.url }}</a></li>
                                                 {% endif %}
                                             {% endfor %}
                                         </ul>
@@ -61,6 +67,11 @@
                                             </ul>
                                         {% endfor %}
                                     {% endif %}
+
+                                    <form method="POST">
+                                        <input type="hidden" name="lesson_id" value="{{ lesson.id }}"/>
+                                        <button class="btn btn-sm btn-primary">Отправить сейчас</button>
+                                    </form>
                                 </div>
                             </div>
                         </div>

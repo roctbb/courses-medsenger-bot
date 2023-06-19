@@ -1,5 +1,6 @@
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import backref
+from helpers import *
 from manage import app
 from flask_migrate import Migrate
 
@@ -50,8 +51,27 @@ class Contract(db.Model):
     courses = db.relationship('Course', secondary='contract_course', backref=backref('contracts', uselist=False),
                               lazy=True, viewonly=True)
 
+    doctor_agent_token = db.Column(db.String, nullable=True)
+    patient_agent_token = db.Column(db.String, nullable=True)
+
     created_on = db.Column(db.DateTime, server_default=db.func.now())
     updated_on = db.Column(db.DateTime, server_default=db.func.now(), server_onupdate=db.func.now())
+
+    def __get_tokens(self):
+        tokens = medsenger_api.get_agent_token(self.id)
+        self.patient_agent_token = tokens['patient_agent_token']
+        self.doctor_agent_token = tokens['doctor_agent_token']
+        db.session.commit()
+
+    def get_patient_token(self):
+        if not self.patient_agent_token:
+            self.__get_tokens()
+        return self.patient_agent_token
+
+    def get_doctor_token(self):
+        if not self.doctor_agent_token:
+            self.__get_tokens()
+        return self.doctor_agent_token
 
 
 class Course(db.Model):
