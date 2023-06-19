@@ -99,7 +99,7 @@ def send_tasks(args, form, lesson_id):
     db.session.commit()
 
     medsenger_api.send_message(contract_id,
-                               "Спасибо за заполнение теста! Вы заработали {points} новых баллов, теперь у Вас {enrollment.points} баллов!",
+                               f"Спасибо за заполнение теста! Вы заработали {points} новых баллов, теперь у Вас {enrollment.points} баллов!",
                                action_deadline=int(time.time()) + 60 * 60 * 3, only_patient=True)
 
     return render_template("done.html")
