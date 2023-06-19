@@ -22,7 +22,7 @@ class CourseSchema(ma.SQLAlchemySchema):
 class AttachmentSchema(ma.Schema):
     url = ma.Str(required=True)
     title = ma.Str(required=False)
-    store_as_info = ma.Boolean(required=True)
+    store_as_info = ma.Boolean()
 
 
 class VariantSchema(ma.Schema):
