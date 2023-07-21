@@ -278,7 +278,13 @@
                     }
                 },
                 addLesson() {
-                    this.lessons.push({tasks: [], attachments: []})
+                    let day = 1
+
+                    if (this.lessons.length > 0) {
+                        day = this.lessons[this.lessons.length - 1] + 7
+                    }
+
+                    this.lessons.push({tasks: [], attachments: [], day: day})
                 },
                 askForLessonDeletion(lesson) {
                     let result = confirm("Удалить урок " + lesson.title + "?");
