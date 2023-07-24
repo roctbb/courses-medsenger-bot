@@ -87,7 +87,7 @@ class Course(db.Model):
         return {
             "id": self.id,
             "title": self.title,
-            "lessons": [lesson.to_dict() for lesson in self.lessons]
+            "lessons": [lesson.to_dict() for lesson in sorted(self.lessons, key=lambda l: l.id)]
         }
 
 
