@@ -108,6 +108,7 @@ class Lesson(db.Model):
             "title": self.title,
             "text": self.text,
             "tasks": self.tasks,
+            "day": self.day,
             "attachments": self.attachments
         }
 
