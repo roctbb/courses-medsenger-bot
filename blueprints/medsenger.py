@@ -3,7 +3,7 @@ import time
 
 from flask import Blueprint
 
-from logic.lessson_sender import send_lesson
+from logic.lessson_sender import send_lesson, send_initial_lessons
 from models.schemas import *
 from helpers import *
 from config import *
@@ -44,6 +44,7 @@ def init(data):
 
             if course and course not in contract.courses:
                 db.session.add(Enrollment(contract_id=contract.id, course_id=course.id))
+                send_initial_lessons(contract, course)
 
     db.session.commit()
 
@@ -89,6 +90,10 @@ def remove(data):
     c = Contract.query.filter_by(id=data.get('contract_id')).first()
     if c:
         c.active = False
+
+        for enrollment in c.enrollments:
+            db.session.delete(enrollment)
+
         db.session.commit()
     return "ok"
 

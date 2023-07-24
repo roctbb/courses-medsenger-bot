@@ -43,6 +43,10 @@ def send_actual_lessons(app):
         for contract in contracts:
             for enrollment in contract.enrollments:
                 current_day = (datetime.now() - enrollment.created_on).days
+
+                if current_day == 0:
+                    continue
+
                 course = enrollment.course
                 actual_lessons = [lesson for lesson in
                                   Lesson.query.filter_by(course_id=course.id, day=current_day).all() if
@@ -52,3 +56,10 @@ def send_actual_lessons(app):
                     send_lesson(contract, lesson)
 
         db.session.commit()
+
+def send_initial_lessons(contract, course):
+        actual_lessons = [lesson for lesson in
+                          Lesson.query.filter_by(course_id=course.id, day=0).all()]
+
+        for lesson in actual_lessons:
+            send_lesson(contract, lesson)
