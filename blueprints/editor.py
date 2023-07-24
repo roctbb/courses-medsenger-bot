@@ -15,7 +15,7 @@ def editor():
 @editor_blueprint.route('/api/courses', methods=['GET'])
 @auth.login_required
 def get_courses_list_for_editor():
-    return schemas.courses.dump(Course.query.all())
+    return schemas.courses.dump(Course.query.order_by(models.Course.id).all())
 
 
 @editor_blueprint.route('/api/courses', methods=['POST'])

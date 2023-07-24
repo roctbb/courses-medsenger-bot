@@ -139,7 +139,7 @@
                                                     <input type="text" class="form-control" v-model="task.question">
                                                 </div>
 
-                                                 <div class="mb-3">
+                                                <div class="mb-3">
                                                     <small class="form-label form-label-sm">Картинка</small>
                                                     <input type="text" class="form-control" v-model="task.image">
                                                 </div>
@@ -259,7 +259,7 @@
                 selectCourse(course) {
                     self = this
                     fetch(this.endpoint + '/courses/' + course.id + '/lessons').then(response => response.json()).then(data => {
-                        self.lessons = data
+                        self.lessons = data.sort((a, b) => a.id - b.id)
                         self.selected_course = course
                     })
 
