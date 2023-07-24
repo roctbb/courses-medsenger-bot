@@ -103,7 +103,7 @@ def preview(args, form, id):
         abort(401)
 
     course = Course.query.get_or_404(id)
-    return render_template("preview.html", course=course)
+    return render_template("preview.html", course=course.to_dict())
 
 
 @medsenger_blueprint.route('/preview/<int:id>', methods=['POST'])
