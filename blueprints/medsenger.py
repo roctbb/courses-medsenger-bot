@@ -50,6 +50,39 @@ def init(data):
     return "ok"
 
 
+@medsenger_blueprint.route('/order', methods=['POST'])
+@verify_json
+def order(data):
+    contract_id = data.get('contract_id')
+    contract = Contract.query.filter_by(id=contract_id).first()
+
+    if not contract:
+        abort(422)
+
+    try:
+        if "add_course_" in data['order']:
+            course_id = int(data['order'].lstrip('"add_course_"'))
+            course = Course.query.get(course_id)
+
+            if course and course not in contract.courses:
+                enrollment = Enrollment(course_id=course_id, contract_id=contract_id)
+                db.session.add(enrollment)
+
+        if "remove_course_" in data['order']:
+            course_id = int(data['order'].lstrip('"remove_course_"'))
+            enrollment = Enrollment.query.filter_by(course_id=course_id, contract_id=contract_id).first()
+
+            if enrollment:
+                db.session.delete(enrollment)
+
+        db.session.commit()
+
+    except Exception as e:
+        print(e)
+
+    return "ok"
+
+
 @medsenger_blueprint.route('/remove', methods=['POST'])
 @verify_json
 def remove(data):
@@ -99,6 +132,7 @@ def force_send(args, form, id):
 @verify_args
 def tasks(args, form, lesson_id):
     lesson = Lesson.query.get_or_404(lesson_id)
+
     return render_template("tasks.html", lesson=lesson)
 
 

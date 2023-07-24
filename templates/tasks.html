@@ -13,6 +13,11 @@
 
                             <div class="card-body">
                                 <h5>{{ task.question }}</h5>
+
+                                {% if task.image %}
+                                    <img src="{{ task.image }}" class="my-2" style="max-width: 80%;" />
+                                {% endif %}
+
                                 {% set question_loop = loop %}
                                 {% for variant in task.variants %}
                                     <div class="form-check my-2">

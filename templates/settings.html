@@ -10,7 +10,7 @@
                 <h3>Назначенные курсы</h3>
             </div>
             <div class="col-6" v-for="enrollment in enrollments">
-                <div class="card">
+                <div class="card my-2">
                     <div class="card-body">
                         <h6 class="card-title">{{ enrollment.course.title }}</h6>
                         <p>Набрано баллов: {{ enrollment.points }}</p>
@@ -38,14 +38,16 @@
                 <h3>Каталог курсов</h3>
             </div>
             <div class="col-6" v-for="course in courses">
-                <div class="card">
+                <div class="card my-2">
                     <div class="card-body">
                         <h6 class="card-title">{{ course.title }}</h6>
                         <a :href="previewUrl(course)" target="_blank" class="btn btn-sm btn-primary me-1 my-1">Посмотреть</a>
                         <form method="post" style="display: inline;">
                             <input type="hidden" name="course_id" :value="course.id"/>
                             <input type="hidden" name="action_type" value="add_course">
-                            <button class="btn btn-sm btn-success">Подключить</button>
+                            <button class="btn btn-sm btn-success" :disabled="enrolled_courses_ids.includes(course.id)">
+                                Подключить
+                            </button>
                         </form>
                     </div>
                 </div>
@@ -89,6 +91,7 @@
                 this.token = '{{ agent_token }}'
                 this.enrollments = JSON.parse('{{ enrollments_json | safe }}')
                 this.api_host = '{{ api_host }}'
+                this.enrolled_courses_ids = this.enrollments.map(enrollment => enrollment.course.id)
             }
         }).mount('#app')
     </script>
