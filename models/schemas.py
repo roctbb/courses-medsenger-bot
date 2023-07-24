@@ -32,6 +32,7 @@ class VariantSchema(ma.Schema):
 
 class TaskSchema(ma.Schema):
     question = ma.Str(required=True)
+    image = ma.Str(required=False)
     variants = ma.List(ma.Nested(VariantSchema), required=True, validate=Length(2, 10))
 
 
