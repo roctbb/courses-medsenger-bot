@@ -78,7 +78,7 @@ class Course(db.Model):
     id = db.Column(db.Integer, primary_key=True)
 
     title = db.Column(db.String(1024), nullable=True)
-    lessons = db.relationship('Lesson', backref=backref('course', uselist=False),
+    lessons = db.relationship('Lesson', backref=backref('course', uselist=True),
                               lazy=True)
     enrollments = db.relationship('Enrollment', backref=backref('course', uselist=False),
                                   lazy=True, viewonly=True)
