@@ -4,6 +4,12 @@
 
 {% block content %}
 
+    <script>
+        function disableButton() {
+            document.querySelector('#submit_button').disabled = true;
+        }
+    </script>
+
     <div class="container">
         <div class="row">
             <div class="col-md-12">
@@ -15,7 +21,7 @@
                                 <h5>{{ task.question }}</h5>
 
                                 {% if task.image %}
-                                    <img src="{{ task.image }}" class="my-2" style="max-width: 80%;" />
+                                    <img src="{{ task.image }}" class="my-2" style="max-width: 80%;"/>
                                 {% endif %}
 
                                 {% set question_loop = loop %}
@@ -33,7 +39,7 @@
                         </div>
 
                     {% endfor %}
-                    <button class="btn btn-success btn-lg">Ответить</button>
+                    <button class="btn btn-success btn-lg" id="submit_button" onclick="disableButton()">Ответить</button>
                 </form>
             </div>
         </div>
