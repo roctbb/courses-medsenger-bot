@@ -7,6 +7,7 @@
     <script>
         function disableButton() {
             document.querySelector('#submit_button').disabled = true;
+            return true;
         }
     </script>
 
@@ -39,7 +40,7 @@
                         </div>
 
                     {% endfor %}
-                    <button class="btn btn-success btn-lg" id="submit_button" onclick="disableButton()">Ответить</button>
+                    <button class="btn btn-success btn-lg" id="submit_button" onclick="return disableButton();">Ответить</button>
                 </form>
             </div>
         </div>
