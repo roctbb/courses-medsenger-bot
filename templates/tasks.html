@@ -5,16 +5,16 @@
 {% block content %}
 
     <script>
-        function disableButton() {
+        function disableButtonAndSubmit() {
             document.querySelector('#submit_button').disabled = true;
-            return true;
+            document.querySelector('#form').submit();
         }
     </script>
 
     <div class="container">
         <div class="row">
             <div class="col-md-12">
-                <form method="post">
+                <form method="post" id="form">
                     {% for task in lesson.tasks %}
                         <div class="card my-2">
 
@@ -40,7 +40,7 @@
                         </div>
 
                     {% endfor %}
-                    <button class="btn btn-success btn-lg" id="submit_button" onclick="return disableButton();">Ответить</button>
+                    <button class="btn btn-success btn-lg" id="submit_button" onclick="disableButtonAndSubmit()">Ответить</button>
                 </form>
             </div>
         </div>
