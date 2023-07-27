@@ -37,12 +37,15 @@ def send_lesson(contract, lesson, with_test=True):
 
 
 def send_actual_lessons(app):
+    print(gts(), "running send actual lessons")
     with app.app_context():
         contracts = Contract.query.filter_by(active=True).all()
 
         for contract in contracts:
+            print("contract:", contract.id)
             for enrollment in contract.enrollments:
                 current_day = (datetime.now() - enrollment.created_on).days
+                print("current_day:", current_day)
 
                 if current_day == 0:
                     continue
