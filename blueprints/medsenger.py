@@ -172,7 +172,7 @@ def send_tasks(args, form, lesson_id):
                                    action_deadline=int(time.time()) + 60 * 60 * 3, only_patient=True)
     else:
         medsenger_api.send_message(contract_id,
-                                   f"Спасибо за заполнение теста! Вы ответили правильно на все вопросы и заработали {points} {points_word}. Теперь Вас {enrollment.points} {total_points_word}!",
+                                   f"Спасибо за заполнение теста! Вы ответили правильно на все вопросы и заработали {points} {points_word}. Теперь у Вас {enrollment.points} {total_points_word}!",
                                    action_deadline=int(time.time()) + 60 * 60 * 3, only_patient=True)
 
     return render_template('done.html', points=points, status=status, points_word=points_word, total_points_word=total_points_word, lesson=lesson,
