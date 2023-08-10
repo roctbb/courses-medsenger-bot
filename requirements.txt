@@ -10,3 +10,4 @@ flask_httpauth
 marshmallow
 flask-marshmallow
 marshmallow-sqlalchemy
+pillow
