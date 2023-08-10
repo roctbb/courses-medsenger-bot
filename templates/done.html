@@ -1,35 +1,33 @@
 {% extends "base_vue.html" %}
 {% block title %}Тест заполнен{% endblock %}
 {% block content %}
-    <h3 style="text-align: center; margin-bottom: 15px;">Тест заполнен</h3>
+    <h4 style="text-align: center; margin-bottom: 15px;">Тест заполнен</h4>
 
     <div class="container">
         <div class="row">
             <div class="col-12">
-                {% if status == 0 %}
-                    <div class="alert alert-danger" role="alert">
-                        <h4 class="alert-heading">Вы не получили баллы!</h4>
-                        <p>Вы ответили неправильно на все вопросы! Не волнуйтесь, мы учимся на ошибках! Вы могли получить {{ maxpoints }} баллов</p>
-                        <hr>
-                        <p class="mb-0">Всего у вас {{ balance }} {{ b }}.</p>
-                    </div>
-                {% elif status == 1 %}
+                {% if points == 0 %}
                     <div class="alert alert-warning" role="alert">
-                        <h4 class="alert-heading">Вы получили неполное количество баллов!</h4>
-                        <p>Вы ответили на вопросы частично правильно и получили {{ points }} {{ p }} из {{ maxpoints }}!</p>
+                        <h5 class="alert-heading">Вы не получили баллы...</h5>
+                        <p>Не волнуйтесь, мы учимся на ошибках!</p>
                         <hr>
-                        <p class="mb-0">Всего у вас {{ balance }} {{ b }}.</p>
+                        <p class="mb-0">Всего у вас {{ enrollment.points }} {{ total_points_word }}.</p>
                     </div>
-                {% elif status == 2 %}
-                    <div class="alert alert-success" role="alert">
-                        <h4 class="alert-heading">Вы получили максимальное количество баллов!</h4>
-                        <p>Вы ответили правильно на все вопросы и получили {{ points }} {{ p }} из {{ maxpoints }}!</p>
+                {% elif points < max_points %}
+                    <div class="alert alert-warning" role="alert">
+                        <h5 class="alert-heading">Вы получили неполное количество баллов.</h5>
+                        <p>Вы получили {{ points }} {{ points_word }} из {{ max_points }}!</p>
                         <hr>
-                        <p class="mb-0">Всего у вас {{ balance }} {{ b }}.</p>
+                        <p class="mb-0">Всего у вас {{ enrollment.points }} {{ total_points_word }}.</p>
+                    </div>
+                {% else %}
+                    <div class="alert alert-success" role="alert">
+                        <h5 class="alert-heading">Вы получили максимальное количество баллов!</h5>
+                        <p>Вы ответили правильно на все вопросы и получили {{ points }} {{ points_word }}!</p>
+                        <hr>
+                        <p class="mb-0">Всего у вас {{ enrollment.points }} {{ total_points_word }}.</p>
                     </div>
                 {% endif %}
-
-                <p></p>
 
                 {% for task in lesson.tasks %}
                     <div class="card">
@@ -51,7 +49,7 @@
                                             {{ variant.text }}
                                         </b>
                                         <i>
-                                            ( +{{ variant.points }} баллов)
+                                            ( + {{ variant.points }})
                                         </i>
                                     {% else %}
                                         <b>
@@ -75,7 +73,7 @@
     <p style="text-align: center">
         <small>Окно закроется автоматически через 5 секунд.</small>
         <br>
-        <small>вы можете закрыть его кнопкой ниже</small>
+        <small>Вы можете закрыть его кнопкой ниже</small>
     </p>
 
     <div class="d-grid gap-2 col-3 mx-auto">
@@ -89,15 +87,10 @@
             window.parent.postMessage('close-modal-success', '*');
             window.close();
         }, 5000)
-    </script>
 
-    <script>
         closeButton(function () {
             window.parent.postMessage('close-modal-success', '*');
             window.close();
         })
     </script>
-
-
-
 {% endblock %}

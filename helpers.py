@@ -32,11 +32,11 @@ def verify_args(func):
             abort(422)
         if request.args.get('api_key') != API_KEY:
             abort(401)
-        try:
-            return func(request.args, request.form, *args, **kargs)
-        except Exception as e:
-            log(e, True)
-            abort(500)
+        # try:
+        return func(request.args, request.form, *args, **kargs)
+        # except Exception as e:
+        #     log(e, True)
+        #     abort(500)
 
     wrapper.__name__ = func.__name__
     return wrapper
