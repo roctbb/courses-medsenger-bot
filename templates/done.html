@@ -88,9 +88,9 @@
             window.close();
         }, 5000)
 
-        closeButton(function () {
+        function closeButton () {
             window.parent.postMessage('close-modal-success', '*');
             window.close();
-        })
+        }
     </script>
 {% endblock %}
