@@ -4,205 +4,390 @@
 
 {% block content %}
     {% raw %}
-    <div id="app" class="container-fluid">
-        <div class="row">
-            <div class="col-12">
-                <nav class="navbar bg-body-tertiary">
-                    <div class="container-fluid">
-                        <span class="navbar-brand mb-0 h1">Редактор пациентских курсов</span>
-                    </div>
-                </nav>
+        <div id="app" class="container-fluid">
+            <div class="row">
+                <div class="col-12">
+                    <nav class="navbar bg-body-tertiary">
+                        <div class="container-fluid">
+                            <span class="navbar-brand mb-0 h1">Редактор пациентских курсов</span>
+                        </div>
+                    </nav>
+                </div>
             </div>
-        </div>
 
-        <div class="row">
-            <div class="col-md-3">
-                <ol class="list-group px-2 py-2">
-                    <li class="list-group-item justify-content-between align-items-start" aria-current="true"
-                        v-for="course in courses"
-                        :class="{ active: selected_course && course.id === selected_course.id }"
-                        @click="selectCourse(course)">
-                        <div v-if="edited_course && course.id === edited_course.id">
-                            <div class="row px-0 py-0 gx-1">
-                                <div class="col-10 d-flex">
-                                    <input v-model="course.title" type="text" class="form-control form-control-sm">
-                                </div>
-                                <div class="col-2">
-                                    <button @click="saveCourse(course)" class="btn btn-sm btn-primary col-12"><i
-                                            class="bi bi-check"></i>
-                                    </button>
+            <div class="row">
+                <div class="col-md-3">
+                    <ol class="list-group px-2 py-2">
+                        <li class="list-group-item justify-content-between align-items-start" aria-current="true"
+                            v-for="course in courses"
+                            :class="{ active: selected_course && course.id === selected_course.id }"
+                            @click="selectCourse(course)">
+                            <div v-if="edited_course && course.id === edited_course.id">
+                                <div class="row px-0 py-0 gx-1">
+                                    <div class="col-10 d-flex">
+                                        <input v-model="course.title" type="text" class="form-control form-control-sm">
+                                    </div>
+                                    <div class="col-2">
+                                        <button @click="saveCourse(course)" class="btn btn-sm btn-primary col-12"><i
+                                                class="bi bi-check"></i>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <div v-else class="col-12 d-flex">
-                            <div class="ms-2 me-auto">
-                                {{ course.id }}. {{ course.title }}
+                            <div v-else class="col-12 d-flex">
+                                <div class="ms-2 me-auto">
+                                    {{ course.title }}
+                                </div>
+
+                                <!--<a href="#" @click="editCourse(course)"><span class="badge bg-primary rounded-pill mx-1"><i
+                                        class="bi bi-pencil-fill"></i></span></a>
+                                <a href="#" @click="askForCourseDeletion(course)"><span
+                                        class="badge bg-primary rounded-pill mx-1"><i class="bi bi-x"></i></span></a>-->
                             </div>
-                            <a href="#" @click="editCourse(course)"><span class="badge bg-primary rounded-pill mx-1"><i
-                                    class="bi bi-pencil-fill"></i></span></a>
-                            <a href="#" @click="askForCourseDeletion(course)"><span
-                                    class="badge bg-primary rounded-pill mx-1"><i class="bi bi-x"></i></span></a>
+                        </li>
+                    </ol>
+                    <div class="row px-2 py-2 gx-1">
+                        <div class="col-10">
+                            <input v-model="new_course_title" type="text" class="form-control">
                         </div>
-                    </li>
-                </ol>
-                <div class="row px-2 py-2 gx-1">
-                    <div class="col-10">
-                        <input v-model="new_course_title" type="text" class="form-control">
-                    </div>
-                    <div class="col-2">
-                        <button @click="addCourse()" class="btn btn-primary col-12"><i class="bi bi-plus"></i></button>
-                    </div>
-                </div>
-
-            </div>
-            <div class="col-md-9">
-                <div class="alert alert-warning my-2" v-if="error">
-                    {{ error }}
-                </div>
-
-                <div class="accordion py-2" id="lessons" v-if="selected_course">
-                    <div class="accordion-item" v-for="(lesson, i) in lessons">
-                        <h2 class="accordion-header">
-                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                                    :data-bs-target="'#lesson' + i" aria-expanded="false" :aria-controls="'lesson' + i">
-                                {{ lesson.title }}
+                        <div class="col-2">
+                            <button @click="addCourse()" class="btn btn-primary col-12"><i class="bi bi-plus"></i>
                             </button>
-                        </h2>
-                        <div :id="'lesson' + i" class="accordion-collapse collapse" data-bs-parent="#lessons">
-                            <div class="accordion-body">
-                                <h6>Информационное сообщение</h6>
-                                <div class="mb-3">
-                                    <label class="form-label form-label-sm">Название</label>
-                                    <input type="text" class="form-control" v-model="lesson.title">
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label form-label-sm">Текст</label>
-                                    <textarea class="form-control" rows="5" v-model="lesson.text"></textarea>
-                                </div>
+                        </div>
+                    </div>
 
-                                <div class="mb-3">
-                                    <label class="form-label form-label-sm">День отправки</label>
-                                    <input type="number" class="form-control" v-model="lesson.day">
-                                </div>
+                </div>
 
-                                <h6>Вложения</h6>
+                <div class="col-md-9">
+                    <div class="alert alert-warning my-2" v-if="error">
+                        {{ error }}
+                    </div>
+                    <div v-if="selected_course">
+                        <div class="d-grid gap-2 d-md-block">
+                            <button class="btn btn-success btn-sm mx-1 my-2" @click="edit(selected_course)">
+                                Редактировать курс
+                            </button>
+                        </div>
 
-                                <div class="row g-3 align-items-center py-1" v-for="attachment in lesson.attachments">
-                                    <div class="col-auto">
-                                        <label class="col-form-label col-form-label-sm">URL</label>
-                                    </div>
-                                    <div class="col-auto">
-                                        <input type="text" class="form-control form-control-sm"
-                                               v-model="attachment.url">
-                                    </div>
-                                    <div class="col-auto">
-                                        <label class="col-form-label col-form-label-sm">Название</label>
-                                    </div>
-                                    <div class="col-auto">
-                                        <input type="text" class="form-control form-control-sm"
-                                               v-model="attachment.title">
-                                    </div>
-                                    <div class="col-auto">
-                                        <label class="col-form-label col-form-label-sm">Закрепить?</label>
-                                    </div>
-                                    <div class="col-auto">
-                                        <input type="checkbox" v-model="attachment.store_as_info">
-                                    </div>
-                                    <div class="col-auto">
-                                        <a href="#" @click="askForAttachmentDeletion(lesson, attachment)"><span
-                                                class="badge bg-primary rounded-pill mx-1"><i
-                                                class="bi bi-x"></i></span></a>
-                                    </div>
-                                </div>
-                                <div v-if="lesson.attachments.length === 0" class="px-1">Вложений не добавлено</div>
+                        <!-- редактирование курса и дипломы -->
 
-                                <a href="#" @click="addAttachment(lesson)"><span
-                                        class="badge bg-primary rounded-pill mx-1 my-2"><i
-                                        class="bi bi-plus"></i></span></a>
+                                <div class="mb-3" v-if="selected_course.editcourse">
+                                    <div class="card">
+                                        <div class="card-body">
 
-                                <h6>Вопросы</h6>
+                                    <div class="mb-3">
+                                        <label class="form-label">Название</label>
+                                        <input type="text" class="form-control" v-model="selected_course.title">
+                                    </div>
 
-                                <div class="accordion" :id="'lesson' + i + '_tasks'">
-                                    <div class="accordion-item" v-for="(task, j) in lesson.tasks">
-                                        <h2 class="accordion-header">
-                                            <button class="accordion-button p-2" type="button" data-bs-toggle="collapse"
-                                                    :data-bs-target="'#lesson' + i + '_task' + j" aria-expanded="true"
-                                                    :aria-controls="'lesson' + i + '_task' + j">
-                                                <small>{{ task.question }}</small>
-                                            </button>
-                                        </h2>
-                                        <div :id="'lesson' + i + '_task' + j" class="accordion-collapse collapse show"
-                                             :data-bs-parent="'#lesson' + i + '_tasks'">
-                                            <div class="accordion-body">
-                                                <div class="mb-3">
-                                                    <small class="form-label form-label-sm">Текст вопроса</small>
-                                                    <input type="text" class="form-control" v-model="task.question">
+                                    <div class="mb-3">
+                                        <label class="form-label">ID</label>
+                                        <input type="text" class="form-control" v-model="selected_course.id" disabled>
+                                    </div>
+
+                                    <p></p>
+
+                                    <h6>Дипломы</h6>
+
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" role="switch"
+                                               v-model="selected_course.show_diploma">
+                                        <label class="form-check-label">Выдавать дипломы</label>
+                                    </div>
+
+                                    <div v-if="selected_course.show_diploma">
+
+                                        <div class="row g-3 align-items-center">
+                                            <div class="col-auto">
+                                                <label for="inputPassword6" class="col-form-label">За</label>
+                                            </div>
+                                            <div class="col-auto">
+                                                <input type="number" class="form-control"
+                                                       v-model="selected_course.diploma_points">
+                                            </div>
+                                            <div class="col-auto">
+                            <span class="form-text">
+                              баллов
+                            </span>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-check mt-3">
+                                            <input class="form-check-input" type="checkbox" value=""
+                                                   v-model="selected_course.show_info_name">
+                                            <label class="form-check-label">
+                                                Имя
+                                            </label>
+                                        </div>
+
+                                        <div class="form-check mb-3">
+                                            <input class="form-check-input" type="checkbox" value=""
+                                                   v-model="selected_course.show_info_date">
+                                            <label class="form-check-label">
+                                                Дата
+                                            </label>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label class="form-label">Шаблон</label>
+                                            <input class="form-control" type="text"
+                                                   v-model="selected_course.diploma_template">
+                                            <div class="form-text">Введите ссылку на файл с шаблоном диплома</div>
+                                        </div>
+
+                                        <div v-if="selected_course.show_info_name">
+                                            <div class="mb-3">
+                                                <label class="fotm-control">Расположение имени</label>
+                                                <select class="form-select"
+                                                        v-model="selected_course.diploma_name_location">
+                                                    <option value="center">Центр</option>
+                                                    <option value="right">Справа</option>
+                                                    <option value="left">Слева</option>
+                                                </select>
+                                            </div>
+
+                                            <div class="mb-3">
+                                                <label class="form-label">Размер шрифта для имени</label>
+                                                <input type="number" class="form-control"
+                                                       v-model="selected_course.diploma_name_size">
+                                            </div>
+
+                                            <div class="mb-3">
+                                                <label class="form-label">Положение X для имени</label>
+                                                <input type="number" class="form-control"
+                                                       v-model="selected_course.diploma_name_x">
+                                            </div>
+
+                                            <div class="mb-3">
+                                                <label class="form-label">Положение Y для имени</label>
+                                                <input type="number" class="form-control"
+                                                       v-model="selected_course.diploma_name_y">
+                                            </div>
+
+                                            <div class="mb-3">
+                                                <label class="form-label">Цвет шрифта для имени</label>
+                                                <input type="text" class="form-control"
+                                                       v-model="selected_course.diploma_name_color">
+                                                <div class="form-text">Введите цвет в формате HEX. Для выбора цвета
+                                                    можно
+                                                    использовать
+                                                    <a href="https://htmlcolorcodes.com/color-picker/">этот сайт</a>
                                                 </div>
+                                            </div>
 
-                                                <div class="mb-3">
-                                                    <small class="form-label form-label-sm">Картинка</small>
-                                                    <input type="text" class="form-control" v-model="task.image">
+                                        </div>
+
+                                        <div v-if="selected_course.show_info_date">
+                                            <div class="mb-3">
+                                                <label class="fotm-control">Расположение даты</label>
+                                                <select class="form-select"
+                                                        v-model="selected_course.diploma_date_location">
+                                                    <option value="center">Центр</option>
+                                                    <option value="right">Справа</option>
+                                                    <option value="left">Слева</option>
+                                                </select>
+                                            </div>
+
+                                            <div class="mb-3">
+                                                <label class="form-label">Размер шрифта для даты</label>
+                                                <input type="number" class="form-control"
+                                                       v-model="selected_course.diploma_date_size">
+                                            </div>
+
+                                            <div class="mb-3">
+                                                <label class="form-label">Положение X для даты</label>
+                                                <input type="number" class="form-control"
+                                                       v-model="selected_course.diploma_date_x">
+                                            </div>
+
+                                            <div class="mb-3">
+                                                <label class="form-label">Положение Y для даты</label>
+                                                <input type="number" class="form-control"
+                                                       v-model="selected_course.diploma_date_y">
+                                            </div>
+
+                                            <div class="mb-3">
+                                                <label class="form-label">Цвет шрифта для даты</label>
+                                                <input type="text" class="form-control"
+                                                       v-model="selected_course.diploma_date_color">
+                                                <div class="form-text">Введите цвет в формате HEX. Для выбора цвета
+                                                    можно
+                                                    использовать
+                                                    <a href="https://htmlcolorcodes.com/color-picker/">этот сайт</a>
                                                 </div>
+                                            </div>
 
-                                                <small>Варианты ответа</small>
 
-                                                <div class="row g-3 align-items-center py-1"
-                                                     v-for="variant in task.variants">
-                                                    <div class="col-auto">
-                                                        <label class="col-form-label col-form-label-sm">Ответ</label>
-                                                    </div>
-                                                    <div class="col-auto">
-                                                        <input type="text" class="form-control form-control-sm"
-                                                               v-model="variant.text">
-                                                    </div>
-                                                    <div class="col-auto">
-                                                        <label class="col-form-label col-form-label-sm">Баллы</label>
-                                                    </div>
-                                                    <div class="col-auto">
-                                                        <input type="number" class="form-control form-control-sm"
-                                                               v-model="variant.points">
-                                                    </div>
-                                                    <div class="col-auto">
-                                                        <a href="#"
-                                                           @click="askForVariantDeletion(task, variant)"><span
-                                                                class="badge bg-primary rounded-pill mx-1"><i
-                                                                class="bi bi-x"></i></span></a>
-                                                    </div>
-                                                </div>
+                                        </div>
 
-                                                <div><a href="#" @click="addVariant(task)"><span
-                                                        class="badge bg-primary rounded-pill mx-1 my-2"><i
-                                                        class="bi bi-plus"></i></span></a>
-                                                    <a href="#" @click="askForTaskDeletion(lesson, task)"><span
+
+                                    </div>
+
+                                    <div class="d-grid gap-2 d-md-block">
+                                        <button class="btn btn-success btn-sm mx-1 my-2" @click="saveCourse(course)">
+                                            Сохранить
+                                        </button>
+                                        <button class="btn btn-danger btn-sm mx-1 my-2"
+                                                @click="askForCourseDeletion(selected_course)">Удалить курс
+                                        </button>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion py-2" id="lessons" v-if="selected_course">
+                        <div class="accordion-item" v-for="(lesson, i) in lessons">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                        :data-bs-target="'#lesson' + i" aria-expanded="false"
+                                        :aria-controls="'lesson' + i">
+                                    {{ lesson.title }}
+                                </button>
+                            </h2>
+
+                            <div :id="'lesson' + i" class="accordion-collapse collapse" data-bs-parent="#lessons">
+                                <div class="accordion-body">
+                                    <h6>Информационное сообщение</h6>
+                                    <div class="mb-3">
+                                        <label class="form-label form-label-sm">Название</label>
+                                        <input type="text" class="form-control" v-model="lesson.title">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label form-label-sm">Текст</label>
+                                        <textarea class="form-control" rows="5" v-model="lesson.text"></textarea>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label form-label-sm">День отправки</label>
+                                        <input type="number" class="form-control" v-model="lesson.day">
+                                    </div>
+
+                                    <h6>Вложения</h6>
+
+                                    <div class="row g-3 align-items-center py-1"
+                                         v-for="attachment in lesson.attachments">
+                                        <div class="col-auto">
+                                            <label class="col-form-label col-form-label-sm">URL</label>
+                                        </div>
+                                        <div class="col-auto">
+                                            <input type="text" class="form-control form-control-sm"
+                                                   v-model="attachment.url">
+                                        </div>
+                                        <div class="col-auto">
+                                            <label class="col-form-label col-form-label-sm">Название</label>
+                                        </div>
+                                        <div class="col-auto">
+                                            <input type="text" class="form-control form-control-sm"
+                                                   v-model="attachment.title">
+                                        </div>
+                                        <div class="col-auto">
+                                            <label class="col-form-label col-form-label-sm">Закрепить?</label>
+                                        </div>
+                                        <div class="col-auto">
+                                            <input type="checkbox" v-model="attachment.store_as_info">
+                                        </div>
+                                        <div class="col-auto">
+                                            <a href="#" @click="askForAttachmentDeletion(lesson, attachment)"><span
+                                                    class="badge bg-primary rounded-pill mx-1"><i
+                                                    class="bi bi-x"></i></span></a>
+                                        </div>
+                                    </div>
+                                    <div v-if="lesson.attachments.length === 0" class="px-1">Вложений не добавлено</div>
+
+                                    <a href="#" @click="addAttachment(lesson)"><span
+                                            class="badge bg-primary rounded-pill mx-1 my-2"><i
+                                            class="bi bi-plus"></i></span></a>
+
+                                    <h6>Вопросы</h6>
+
+                                    <div class="accordion" :id="'lesson' + i + '_tasks'">
+                                        <div class="accordion-item" v-for="(task, j) in lesson.tasks">
+                                            <h2 class="accordion-header">
+                                                <button class="accordion-button p-2" type="button"
+                                                        data-bs-toggle="collapse"
+                                                        :data-bs-target="'#lesson' + i + '_task' + j"
+                                                        aria-expanded="true"
+                                                        :aria-controls="'lesson' + i + '_task' + j">
+                                                    <small>{{ task.question }}</small>
+                                                </button>
+                                            </h2>
+                                            <div :id="'lesson' + i + '_task' + j"
+                                                 class="accordion-collapse collapse show"
+                                                 :data-bs-parent="'#lesson' + i + '_tasks'">
+                                                <div class="accordion-body">
+                                                    <div class="mb-3">
+                                                        <small class="form-label form-label-sm">Текст вопроса</small>
+                                                        <input type="text" class="form-control" v-model="task.question">
+                                                    </div>
+
+                                                    <div class="mb-3">
+                                                        <small class="form-label form-label-sm">Картинка</small>
+                                                        <input type="text" class="form-control" v-model="task.image">
+                                                    </div>
+
+                                                    <small>Варианты ответа</small>
+
+                                                    <div class="row g-3 align-items-center py-1"
+                                                         v-for="variant in task.variants">
+                                                        <div class="col-auto">
+                                                            <label class="col-form-label col-form-label-sm">Ответ</label>
+                                                        </div>
+                                                        <div class="col-auto">
+                                                            <input type="text" class="form-control form-control-sm"
+                                                                   v-model="variant.text">
+                                                        </div>
+                                                        <div class="col-auto">
+                                                            <label class="col-form-label col-form-label-sm">Баллы</label>
+                                                        </div>
+                                                        <div class="col-auto">
+                                                            <input type="number" class="form-control form-control-sm"
+                                                                   v-model="variant.points">
+                                                        </div>
+                                                        <div class="col-auto">
+                                                            <a href="#"
+                                                               @click="askForVariantDeletion(task, variant)"><span
+                                                                    class="badge bg-primary rounded-pill mx-1"><i
+                                                                    class="bi bi-x"></i></span></a>
+                                                        </div>
+                                                    </div>
+
+                                                    <div><a href="#" @click="addVariant(task)"><span
                                                             class="badge bg-primary rounded-pill mx-1 my-2"><i
-                                                            class="bi bi-x"></i></span></a></div>
+                                                            class="bi bi-plus"></i></span></a>
+                                                        <a href="#" @click="askForTaskDeletion(lesson, task)"><span
+                                                                class="badge bg-primary rounded-pill mx-1 my-2"><i
+                                                                class="bi bi-x"></i></span></a></div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
+                                    <div v-if="lesson.tasks.length === 0" class="px-1">Вопросов не добавлено</div>
+
+                                    <a href="#" @click="addTask(lesson)"><span
+                                            class="badge bg-primary rounded-pill mx-1 my-2"><i
+                                            class="bi bi-plus"></i></span></a>
+                                    <a href="#" @click="askForLessonDeletion(lesson)"><span
+                                            class="badge bg-primary rounded-pill mx-1 my-2"><i
+                                            class="bi bi-x"></i></span></a>
+
+                                    <p></p>
+
+
                                 </div>
-                                <div v-if="lesson.tasks.length === 0" class="px-1">Вопросов не добавлено</div>
-
-                                <a href="#" @click="addTask(lesson)"><span
-                                        class="badge bg-primary rounded-pill mx-1 my-2"><i
-                                        class="bi bi-plus"></i></span></a>
-                                <a href="#" @click="askForLessonDeletion(lesson)"><span
-                                        class="badge bg-primary rounded-pill mx-1 my-2"><i
-                                        class="bi bi-x"></i></span></a>
-
-
                             </div>
                         </div>
+
+                        <button @click="addLesson()" class="btn btn-primary btn-sm mx-1 my-2">Добавить урок</button>
+                        <button @click="saveAll()" class="btn btn-success btn-sm mx-1 my-2">Сохранить</button>
                     </div>
 
-                    <button @click="addLesson()" class="btn btn-primary btn-sm mx-1 my-2">Добавить урок</button>
-                    <button @click="saveAll()" class="btn btn-success btn-sm mx-1 my-2">Сохранить</button>
+
                 </div>
-
-
             </div>
-        </div>
 
-    </div>
+        </div>
     {% endraw %}
     <script>
         const {createApp} = Vue
@@ -216,7 +401,8 @@
                     endpoint: undefined,
                     new_course_title: "",
                     lessons: [],
-                    error: ""
+                    error: "",
+                    diplomas: {}
                 }
             },
             methods: {
@@ -228,6 +414,13 @@
                     fetch(this.endpoint + '/courses').then(response => response.json()).then(data => {
                         self.courses = data
                     })
+                },
+                edit: function (course) {
+                    if (course.editcourse === true) {
+                        course.editcourse = false
+                    } else {
+                        course.editcourse = true
+                    }
                 },
                 addCourse() {
                     self = this
@@ -245,9 +438,26 @@
                 },
                 saveCourse() {
                     self = this
-                    fetch(this.endpoint + '/courses/' + this.edited_course.id, {
+                    fetch(this.endpoint + '/courses/' + this.selected_course.id, {
                         method: "PUT",
-                        body: JSON.stringify({"title": this.edited_course.title}),
+                        body: JSON.stringify({
+                            "title": this.selected_course.title,
+                            "show_diploma": this.selected_course.show_diploma,
+                            "show_info_name": this.selected_course.show_info_name,
+                            "show_info_date": this.selected_course.show_info_date,
+                            "diploma_points": this.selected_course.diploma_points,
+                            "diploma_template": this.selected_course.diploma_template,
+                            "diploma_name_location": this.selected_course.diploma_name_location,
+                            "diploma_name_size": this.selected_course.diploma_name_size,
+                            "diploma_name_x": this.selected_course.diploma_name_x,
+                            "diploma_name_y": this.selected_course.diploma_name_y,
+                            "diploma_name_color": this.selected_course.diploma_name_color,
+                            "diploma_date_location": this.selected_course.diploma_date_location,
+                            "diploma_date_size": this.selected_course.diploma_date_size,
+                            "diploma_date_x": this.selected_course.diploma_date_x,
+                            "diploma_date_y": this.selected_course.diploma_date_y,
+                            "diploma_date_color": this.selected_course.diploma_date_color,
+                        }),
                         headers: {
                             'Accept': 'application/json',
                             'Content-Type': 'application/json'
