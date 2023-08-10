@@ -14,6 +14,27 @@ class CourseSchema(ma.SQLAlchemySchema):
     id = ma.auto_field(required=False, default=None, allow_none=True)
     title = ma.auto_field(required=True)
 
+    show_diploma = ma.auto_field(required=False, default=None)
+    show_info_name = ma.auto_field(required=False, default=None)
+    show_info_date = ma.auto_field(required=False, default=None)
+
+    diploma_points = ma.auto_field(required=False, default=None)
+    diploma_template = ma.auto_field(required=False, default=None)
+    
+    diploma_name_location = ma.auto_field(required=False, default=None)
+    diploma_name_size = ma.auto_field(required=False, default=None)
+    diploma_name_x = ma.auto_field(required=False, default=None)
+    diploma_name_y = ma.auto_field(required=False, default=None)
+    diploma_name_color = ma.auto_field(required=False, default=None)
+    
+    diploma_date_location = ma.auto_field(required=False, default=None)
+    diploma_date_size = ma.auto_field(required=False, default=None)
+    diploma_date_x = ma.auto_field(required=False, default=None)
+    diploma_date_y = ma.auto_field(required=False, default=None)
+    diploma_date_color = ma.auto_field(required=False, default=None)
+    
+    
+
     @post_load
     def make(self, data, **kwargs):
         return helpers.make(Course, data)

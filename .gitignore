@@ -2,3 +2,5 @@
 data.json
 config.py
 migrations/*
+dimplomas/*
+venv

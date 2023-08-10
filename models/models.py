@@ -16,6 +16,8 @@ class Enrollment(db.Model):
     points = db.Column(db.Integer, default=0)
     created_on = db.Column(db.DateTime, server_default=db.func.now())
     updated_on = db.Column(db.DateTime, server_default=db.func.now(), server_onupdate=db.func.now())
+    diploma_received = db.Column(db.Boolean)
+
 
     def to_dict(self):
         return {
@@ -82,6 +84,27 @@ class Course(db.Model):
                               lazy=True)
     enrollments = db.relationship('Enrollment', backref=backref('course', uselist=False),
                                   lazy=True, viewonly=True)
+
+    show_diploma = db.Column(db.Boolean, default=False)
+    show_info_name = db.Column(db.Boolean, default=False)
+    show_info_date = db.Column(db.Boolean, default=False)
+
+    diploma_points = db.Column(db.Integer, nullable=True)
+    diploma_template = db.Column(db.String(1024), nullable=True)
+    
+    diploma_name_location = db.Column(db.String(1024), nullable=True)
+    diploma_name_size = db.Column(db.Integer, nullable=True)
+    diploma_name_x = db.Column(db.Integer, nullable=True)
+    diploma_name_y = db.Column(db.Integer, nullable=True)
+    diploma_name_color = db.Column(db.String(1024), nullable=True)
+    
+    diploma_date_location = db.Column(db.String(1024), nullable=True)
+    diploma_date_size = db.Column(db.Integer, nullable=True)
+    diploma_date_x = db.Column(db.Integer, nullable=True)
+    diploma_date_y = db.Column(db.Integer, nullable=True)
+    diploma_date_color = db.Column(db.String(1024), nullable=True)
+
+    # diploma fields
 
     def to_dict(self):
         return {
