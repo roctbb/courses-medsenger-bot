@@ -30,7 +30,7 @@ def send_lesson(contract, lesson, with_test=True):
 
     if lesson.tasks and with_test:
         medsenger_api.send_message(contract.id, "Ответьте на вопросы, чтобы получить баллы.", only_patient=True,
-                                   action_name="Ответить", action_link=f'tasks/{contract.id}', action_onetime=True)
+                                   action_name="Ответить", action_link=f'tasks/{lesson.id}', action_onetime=True)
 
     db.session.add(SentLesson(contract_id=contract.id, lesson_id=lesson.id))
 

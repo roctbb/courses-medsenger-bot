@@ -4,6 +4,7 @@ import time
 from flask import Blueprint
 
 from logic.lessson_sender import send_lesson, send_initial_lessons
+from logic.tasks import calculate_points, calculate_max_points, get_word_form
 from models.schemas import *
 from helpers import *
 from config import *
@@ -130,96 +131,8 @@ def force_send(args, form, id):
 
     send_lesson(contract, lesson, with_test)
 
-    return render_template("preview.html", course=course, message="Сообщение отправлено!")
+    return render_template("preview.html", course=course.to_dict(), message="Сообщение отправлено!")
 
-
-@medsenger_blueprint.route('/debug/tasks/<int:lesson_id>', methods=['GET'])
-def debug_tasks(lesson_id):
-    lesson = Lesson.query.get_or_404(lesson_id)
-
-    return render_template("tasks.html", lesson=lesson)
-
-@medsenger_blueprint.route('/debug/tasks/<int:lesson_id>', methods=['POST'])
-def debug_submit_tasks(lesson_id):
-    form = request.form
-    lesson = Lesson.query.get_or_404(lesson_id)
-
-    points = 0
-
-    for i, task in enumerate(lesson.tasks):
-        answer = form.get(f'question_{i}')
-
-        if answer is not None and answer.isnumeric():
-            answer = int(answer)
-
-            if answer >= 0 and answer < len(task['variants']):
-                variant = task['variants'][answer]
-                points += variant['points']
-
-    counter = 0
-
-    true_answers = []
-    false_answers = []
-    ta_poins = []
-    fa_poins = []
-
-    for l in range(len(lesson.tasks)):
-        counter += 1
-
-    maxpoints = 0
-
-    for task in lesson.tasks:
-        question = task['question']
-
-        task['max_points'] = 0
-
-        for v in task['variants']:
-            if v['points'] >= 1:
-
-                if v['points'] > task['max_points']:
-                    task['max_points'] = v['points']
-                else:
-                    pass
-
-                true_answers.append(v['text'])
-                ta_poins.append(v['points'])
-            else:
-                false_answers.append(v['text'])
-                fa_poins.append(v['points'])
-
-        maxpoints += task['max_points']
-
-    if points == 0:
-        status = 0
-    elif points < maxpoints and points > 0:
-        status = 1
-    elif points >= maxpoints:
-        status = 2
-    else:
-        status = 404
-
-    ball_list = ['балл', 'балла', 'баллов']
-
-    if points % 10 == 1 and points % 100 != 11:
-        p = ball_list[0]
-    elif 2 <= points % 10 <= 4 and (points % 100 < 10 or points % 100 >= 20):
-        p = ball_list[1]
-    else:
-        p = ball_list[2]
-
-    balance = 10 #balance=enrollment.points
-
-    if balance % 10 == 1 and balance % 100 != 11:
-        b = ball_list[0]
-    elif 2 <= balance % 10 <= 4 and (balance % 100 < 10 or balance % 100 >= 20):
-        b = ball_list[1]
-    else:
-        b = ball_list[2]
-
-    true_len = len(true_answers)
-    false_len = len(false_answers)
-
-    return render_template('done.html', points=points, balance=10, status=status, truelist=true_answers, falselist=false_answers, question=question, p=p, b=b, truepoints=ta_poins, falsepoints=fa_poins, truelen=true_len, falselen=false_len, lesson=lesson, maxpoints=maxpoints)
 
 @medsenger_blueprint.route('/tasks/<int:lesson_id>', methods=['GET'])
 @verify_args
@@ -240,77 +153,30 @@ def send_tasks(args, form, lesson_id):
     if not enrollment:
         abort(404)
 
-    points = 0
-
-    for i, task in enumerate(lesson.tasks):
-        answer = form.get(f'question_{i}')
-
-        if answer is not None and answer.isnumeric():
-            answer = int(answer)
-
-            if answer >= 0 and answer < len(task['variants']):
-                variant = task['variants'][answer]
-                points += variant['points']
+    points = calculate_points(lesson, form)
+    max_points = calculate_max_points(lesson)
 
     enrollment.points += points
     db.session.commit()
 
-    counter = 0
+    points_word = get_word_form(['балл', 'балла', 'баллов'], points)
+    total_points_word = get_word_form(['балл', 'балла', 'баллов'], enrollment.points)
 
-    for l in range(len(lesson.tasks)):
-        counter += 1
-
-    if points < counter and points <= 0:
-        status = 0
-    elif points < counter and points >= 1:
-        status = 1
-    elif points >= counter:
-        status = 2
+    if points == 0:
+        medsenger_api.send_message(contract_id,
+                                   f"Спасибо за заполнение теста! Вы не заработали баллы за это задание. У Вас {enrollment.points} {total_points_word}.",
+                                   action_deadline=int(time.time()) + 60 * 60 * 3, only_patient=True)
+    elif points < max_points:
+        medsenger_api.send_message(contract_id,
+                                   f"Спасибо за заполнение теста! Вы частично правильно ответили на вопросы и заработали {points} {points_word}. Теперь у Вас {enrollment.points} {total_points_word}.",
+                                   action_deadline=int(time.time()) + 60 * 60 * 3, only_patient=True)
     else:
-        status = 404
+        medsenger_api.send_message(contract_id,
+                                   f"Спасибо за заполнение теста! Вы ответили правильно на все вопросы и заработали {points} {points_word}. Теперь Вас {enrollment.points} {total_points_word}!",
+                                   action_deadline=int(time.time()) + 60 * 60 * 3, only_patient=True)
 
-    if status == 0:
-        medsenger_api.send_message(contract_id, f"Спасибо за заполнение теста! К сожалению, Вы не заработали баллы, так как ответили неправильно. У Вас {enrollment.points} баллов", action_deadline=int(time.time()) + 60 * 60 * 3, only_patient=True)
-    elif status == 1:
-        medsenger_api.send_message(contract_id, f"Спасибо за заполнение теста! Вы частично правильно ответили на вопросы и заработали {points} баллов. Теперь у Вас {enrollment.points} баллов", action_deadline=int(time.time()) + 60 * 60 * 3, only_patient=True)
-    elif status == 2:
-        medsenger_api.send_message(contract_id, f"Спасибо за заполнение теста! Вы ответили правильно и заработали {points} баллов. Теперь Вас {enrollment.points} баллов!", action_deadline=int(time.time()) + 60 * 60 * 3, only_patient=True)
-
-    ball_list = ['балл', 'балла', 'баллов']
-
-
-    if points % 10 == 1 and points % 100 != 11:
-        p = ball_list[0]
-    elif 2 <= points % 10 <= 4 and (points % 100 < 10 or points % 100 >= 20):
-        p = ball_list[1]
-    else:
-        p = ball_list[2]
-
-    balance=enrollment.points
-
-
-    if balance % 10 == 1 and balance % 100 != 11:
-        b = ball_list[0]
-    elif 2 <= balance % 10 <= 4 and (balance % 100 < 10 or balance % 100 >= 20):
-        b = ball_list[1]
-    else:
-        b = ball_list[2]
-
-    true_answers = []
-    false_answers = []
-
-    for l in range(len(lesson.tasks)):
-        counter += 1
-
-    for task in lesson.tasks:
-        question = task['question']
-        for v in task['variants']:
-            if v['points'] >= 1:
-                true_answers.append(v['text'])
-            else:
-                false_answers.append(v['text'])
-
-    return render_template("done.html", points=points, balance=balance, status=status, p=p, b=b, truelist=true_answers, falselist=false_answers, question=question)
+    return render_template('done.html', points=points, status=status, points_word=points_word, total_points_word=total_points_word, lesson=lesson,
+                           max_points=max_points, enrollment=enrollment)
 
 
 @medsenger_blueprint.route('/settings', methods=['GET'])
