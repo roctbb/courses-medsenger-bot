@@ -9,7 +9,7 @@
             <div class="col-12">
                 <nav class="navbar bg-body-tertiary">
                     <div class="container-fluid">
-                        <span class="navbar-brand mb-0 h1">Предпросмотр курса {{ course.title }}</span>
+                        <span class="navbar-brand mb-0 h1">Предпросмотр курса «{{ course.title }}»</span>
                     </div>
                 </nav>
             </div>
@@ -18,7 +18,10 @@
         <div class="row">
             <div class="col-md-12">
                 {% if message %}
-                    <div class="alert alert-success my-2">{{ message }}</div>
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
                 {% endif %}
 
                 <div class="accordion py-2" id="lessons">
@@ -57,20 +60,44 @@
                                     {% if lesson.tasks %}
                                         <h6>Вопросы</h6>
 
+
+
+
                                         {% for task in lesson.tasks %}
+                                            <div class="card mb-3 mt-3">
+                                            <div class="card-body">
                                             <p><strong>{{ task.question }}</strong></p>
                                             <ul>
+
                                                 {% for variant in task.variants %}
-                                                    <li>{{ variant.text }} <i>(баллов -
-                                                        <strong>{{ variant.points }}</strong>)</i></li>
+
+                                                    {% if variant.points > 0 %}
+                                                        <li style="color: green">{{ variant.text }}
+                                                            <i style="color: black">
+                                                                (+<b>{{ variant.points }}</b>)
+                                                            </i>
+                                                        </li>
+                                                    {% else %}
+                                                        <li style="color: black">{{ variant.text }}
+                                                            <i style="color: black">
+                                                                {% if "-" in variant.points|string %}
+                                                                    (<b>{{ variant.points }}</b>)
+                                                                {% else %}
+                                                                {% endif %}
+                                                            </i>
+                                                        </li>
+                                                    {% endif %}
                                                 {% endfor %}
                                             </ul>
+                                                                                </div>
+                                    </div>
                                         {% endfor %}
+
                                     {% endif %}
 
                                     <form method="POST">
                                         <input type="hidden" name="lesson_id" value="{{ lesson.id }}"/>
-                                        <button class="btn btn-sm btn-primary">Отправить сейчас</button>
+                                        <button class="btn btn-sm btn-success">Отправить сейчас</button>
                                     </form>
                                 </div>
                             </div>

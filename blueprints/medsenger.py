@@ -137,6 +137,11 @@ def force_send(args, form, id):
 @medsenger_blueprint.route('/tasks/<int:lesson_id>', methods=['GET'])
 @verify_args
 def tasks(args, form, lesson_id):
+    contract_id = args.get('contract_id')
+
+    if DoneLesson.query.filter_by(contract_id=contract_id, lesson_id=lesson_id).first():
+        return render_template('passed.html')
+
     lesson = Lesson.query.get_or_404(lesson_id)
 
     return render_template("tasks.html", lesson=lesson)
@@ -157,6 +162,8 @@ def send_tasks(args, form, lesson_id):
     max_points = calculate_max_points(lesson)
 
     enrollment.points += points
+
+    db.session.add(DoneLesson(contract_id=contract_id, lesson_id=lesson_id))
     db.session.commit()
 
     points_word = get_word_form(['балл', 'балла', 'баллов'], points)
@@ -175,7 +182,8 @@ def send_tasks(args, form, lesson_id):
                                    f"Спасибо за заполнение теста! Вы ответили правильно на все вопросы и заработали {points} {points_word}. Теперь у Вас {enrollment.points} {total_points_word}!",
                                    action_deadline=int(time.time()) + 60 * 60 * 3, only_patient=True)
 
-    return render_template('done.html', points=points, status=status, points_word=points_word, total_points_word=total_points_word, lesson=lesson,
+    return render_template('done.html', points=points, status=status, points_word=points_word,
+                           total_points_word=total_points_word, lesson=lesson,
                            max_points=max_points, enrollment=enrollment)
 
 

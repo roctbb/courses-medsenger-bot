@@ -39,6 +39,13 @@ class SentLesson(db.Model):
     contract_id = db.Column(db.Integer, db.ForeignKey('contract.id', ondelete='CASCADE'))
     created_on = db.Column(db.DateTime, server_default=db.func.now())
 
+class DoneLesson(db.Model):
+    __tablename__ = 'contract_tasks'
+
+    id = db.Column(db.Integer, primary_key=True)
+    lesson_id = db.Column(db.Integer, db.ForeignKey('lesson.id', ondelete='CASCADE'))
+    contract_id = db.Column(db.Integer, db.ForeignKey('contract.id', ondelete='CASCADE'))
+    created_on = db.Column(db.DateTime, server_default=db.func.now())
 
 class Contract(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -134,6 +141,10 @@ class Lesson(db.Model):
             "day": self.day,
             "attachments": self.attachments
         }
+
+# class Course_lessons(db.Model):
+#     for l in Lesson:
+#         pass
 
 
 db.init_app(app)

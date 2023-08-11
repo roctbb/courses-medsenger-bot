@@ -1,0 +1,47 @@
+{% extends 'base_vue.html' %}
+
+{% block title %}Доступ запрещен{% endblock %}
+
+{% block content %}
+
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <h4 style="text-align: center; margin-bottom: 15px;">Вы уже проходили этот тест</h4>
+
+                <img class="mt-3 mb-3" src="https://img.icons8.com/?size=512&id=11997&format=png" width="100">
+
+                <div class="alert alert-warning mb-5" role="alert">
+                    <h5 class="alert-heading">Вы уже прошли этот тест</h5>
+                    <hr>
+                    <p>Тесты доступны для прохождения только один раз!</p>
+                </div>
+
+                <p style="text-align: center">
+                    <small>Окно закроется автоматически через 5 секунд.</small>
+                    <br>
+                    <small>Вы можете закрыть его кнопкой ниже</small>
+                </p>
+
+                <div class="d-grid gap-2 col-3 mx-auto">
+                    <button class="btn btn-success btn-sm" id="submit_button" onclick="closeButton()">Закрыть</button>
+                </div>
+
+                <p></p>
+
+                <script>
+                    setTimeout(function () {
+                        window.parent.postMessage('close-modal-success', '*');
+                        window.close();
+                    }, 5000)
+
+                    function closeButton () {
+                        window.parent.postMessage('close-modal-success', '*');
+                        window.close();
+                    }
+                </script>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
