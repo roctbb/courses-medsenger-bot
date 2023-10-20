@@ -39,16 +39,12 @@
                                     {{ course.title }}
                                 </div>
 
-                                <!--<a href="#" @click="editCourse(course)"><span class="badge bg-primary rounded-pill mx-1"><i
-                                        class="bi bi-pencil-fill"></i></span></a>
-                                <a href="#" @click="askForCourseDeletion(course)"><span
-                                        class="badge bg-primary rounded-pill mx-1"><i class="bi bi-x"></i></span></a>-->
                             </div>
                         </li>
                     </ol>
                     <div class="row px-2 py-2 gx-1">
                         <div class="col-10">
-                            <input v-model="new_course_title" type="text" class="form-control">
+                            <input v-model="new_course_title" type="text" class="form-control" placeholder="Новый курс">
                         </div>
                         <div class="col-2">
                             <button @click="addCourse()" class="btn btn-primary col-12"><i class="bi bi-plus"></i>
@@ -75,6 +71,8 @@
                             <div class="card">
                                 <div class="card-body">
 
+                                    <h6>Основная информация</h6>
+
                                     <div class="mb-3">
                                         <label class="form-label">Название</label>
                                         <input type="text" class="form-control" v-model="selected_course.title">
@@ -83,6 +81,7 @@
                                     <div class="mb-3">
                                         <label class="form-label">ID</label>
                                         <input type="text" class="form-control" v-model="selected_course.id" disabled>
+                                        <div class="form-text">ID курса нельзя изменить</div>
                                     </div>
 
                                     <p></p>
@@ -246,6 +245,7 @@
                                         :aria-controls="'lesson' + i">
                                     {{ lesson.title }}
                                 </button>
+
                             </h2>
 
                             <div :id="'lesson' + i" class="accordion-collapse collapse" data-bs-parent="#lessons">
@@ -253,11 +253,13 @@
                                     <h6>Информационное сообщение</h6>
                                     <div class="mb-3">
                                         <label class="form-label form-label-sm">Название</label>
-                                        <input type="text" class="form-control" v-model="lesson.title" placeholder="Введите название курса">
+                                        <input type="text" class="form-control" v-model="lesson.title"
+                                               placeholder="Введите название курса">
                                     </div>
                                     <div class="mb-3">
                                         <label class="form-label form-label-sm">Текст</label>
-                                        <textarea class="form-control" rows="5" v-model="lesson.text" placeholder="Введите текст для курса"></textarea>
+                                        <textarea class="form-control" rows="5" v-model="lesson.text"
+                                                  placeholder="Введите текст для курса"></textarea>
                                     </div>
 
                                     <div class="mb-3">
@@ -291,15 +293,17 @@
                                         </div>
                                         <div class="col-auto">
                                             <a href="#" @click="askForAttachmentDeletion(lesson, attachment)"><span
-                                                    class="badge bg-primary rounded-pill mx-1"><i
+                                                    class="badge bg-danger rounded-pill mx-1"><i
                                                     class="bi bi-x"></i></span></a>
                                         </div>
                                     </div>
                                     <div v-if="lesson.attachments.length === 0" class="px-1">Вложений не добавлено</div>
 
-                                    <a href="#" @click="addAttachment(lesson)"><span
-                                            class="badge bg-primary rounded-pill mx-1 my-2"><i
-                                            class="bi bi-plus"></i></span></a>
+
+                                    <button class="btn btn-success btn-sm mx-1 my-2 mb-3"
+                                            @click="addAttachment(lesson)">
+                                        Добавить вложение
+                                    </button>
 
                                     <h6>Вопросы</h6>
 
@@ -318,17 +322,21 @@
                                                  class="accordion-collapse collapse show"
                                                  :data-bs-parent="'#lesson' + i + '_tasks'">
                                                 <div class="accordion-body">
+
+                                                    <h6>Информация</h6>
+
                                                     <div class="mb-3">
                                                         <small class="form-label form-label-sm">Текст вопроса</small>
                                                         <input type="text" class="form-control" v-model="task.question">
                                                     </div>
 
                                                     <div class="mb-3">
-                                                        <small class="form-label form-label-sm">Картинка</small>
+                                                        <small class="form-label form-label-sm">Изображение</small>
                                                         <input type="text" class="form-control" v-model="task.image">
+                                                        <div class="form-text">Введите ссылку на изображение</div>
                                                     </div>
 
-                                                    <small>Варианты ответа</small>
+                                                    <h6>Варианты ответа</h6>
 
                                                     <div class="row g-3 align-items-center py-1"
                                                          v-for="variant in task.variants">
@@ -349,29 +357,39 @@
                                                         <div class="col-auto">
                                                             <a href="#"
                                                                @click="askForVariantDeletion(task, variant)"><span
-                                                                    class="badge bg-primary rounded-pill mx-1"><i
+                                                                    class="badge bg-danger rounded-pill mx-1"><i
                                                                     class="bi bi-x"></i></span></a>
                                                         </div>
                                                     </div>
 
-                                                    <div><a href="#" @click="addVariant(task)"><span
-                                                            class="badge bg-primary rounded-pill mx-1 my-2"><i
-                                                            class="bi bi-plus"></i></span></a>
-                                                        <a href="#" @click="askForTaskDeletion(lesson, task)"><span
-                                                                class="badge bg-primary rounded-pill mx-1 my-2"><i
-                                                                class="bi bi-x"></i></span></a></div>
+                                                    <div>
+                                                        <button class="btn btn-success btn-sm mx-1 my-2 mb-3 mt-3"
+                                                                @click="addVariant(task)">
+                                                            Добавить ответ
+                                                        </button>
+                                                        <button class="btn btn-danger btn-sm mx-1 my-2 mb-3 mt-3"
+                                                                @click="askForTaskDeletion(lesson, task)">
+                                                            Удалить вопрос
+                                                        </button>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
                                     <div v-if="lesson.tasks.length === 0" class="px-1">Вопросов не добавлено</div>
 
-                                    <a href="#" @click="addTask(lesson)"><span
-                                            class="badge bg-primary rounded-pill mx-1 my-2"><i
-                                            class="bi bi-plus"></i></span></a>
-                                    <a href="#" @click="askForLessonDeletion(lesson)"><span
-                                            class="badge bg-primary rounded-pill mx-1 my-2"><i
-                                            class="bi bi-x"></i></span></a>
+                                    <!---->
+
+                                    <div>
+                                        <button class="btn btn-success btn-sm mx-1 my-2 mb-3 mt-3"
+                                                @click="addTask(lesson)">
+                                            Добавить вопрос
+                                        </button>
+                                        <button class="btn btn-danger btn-sm mx-1 my-2 mb-3 mt-3"
+                                                @click="askForLessonDeletion(lesson)">
+                                            Удалить урок
+                                        </button>
+                                    </div>
 
                                     <p></p>
 
@@ -503,12 +521,17 @@
 
                     this.lessons.push({tasks: [], attachments: [], day: day})
                 },
+
                 askForLessonDeletion(lesson) {
                     let result = confirm("Вы действительно хотите удалить урок " + lesson.title + "?");
-
+                    let self = this
                     if (result) {
-                        position = this.lessons.indexOf(lesson)
-                        this.lessons.splice(position, 1);
+                        if (lesson.id) {
+                            fetch(this.endpoint + '/courses/' + this.selected_course.id + '/lessons/' + lesson.id, {method: "DELETE"}).then(response => response.json()).then(data => {
+                            })
+                        }
+                        position = self.lessons.indexOf(lesson)
+                        self.lessons.splice(position, 1);
                     }
                 },
                 addAttachment(lesson) {
