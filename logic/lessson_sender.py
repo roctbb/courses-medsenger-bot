@@ -53,6 +53,10 @@ def send_actual_lessons(app):
                     continue
 
                 course = enrollment.course
+
+                if not enrollment.points:
+                    enrollment.points = 0
+
                 if len(contract.sent_lessons) == len(course.lessons):
                     print("All lessons sent")
                     if course.diploma_points <= enrollment.points:
