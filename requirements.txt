@@ -11,3 +11,4 @@ marshmallow
 flask-marshmallow
 marshmallow-sqlalchemy
 pillow
+sentry-sdk[flask]

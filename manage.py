@@ -1,6 +1,12 @@
 from flask import Flask
 
 from config import *
+import sentry_sdk
+
+if SENTRY_DSN:
+    sentry_sdk.init(
+        dsn=SENTRY_DSN,
+    )
 
 app = Flask(__name__)
 
