@@ -59,9 +59,11 @@ def send_actual_lessons(app):
 
                 if len(contract.sent_lessons) == len(course.lessons):
                     print("All lessons sent")
-                    if course.diploma_points <= enrollment.points:
-                        print("Sending diploma")
-                        send_diploma(enrollment)
+
+                    if course.diploma_points:
+                        if course.diploma_points <= enrollment.points:
+                            print("Sending diploma")
+                            send_diploma(enrollment)
                 else:
                     actual_lessons = [lesson for lesson in
                                       Lesson.query.filter_by(course_id=course.id, day=current_day).all() if
