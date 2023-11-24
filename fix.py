@@ -14,7 +14,12 @@ with app.app_context():
         contract = Contract.query.get(contract_id)
 
         if contract:
+            print(f"Adding course to {contract_id}...")
             enrollment = Enrollment(course_id=course.id, contract_id=contract_id)
             db.session.add(enrollment)
 
             send_initial_lessons(contract, course)
+
+            print(f"Done adding to {contract_id}")
+    db.session.commit()
+
