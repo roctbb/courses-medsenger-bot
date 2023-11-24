@@ -231,6 +231,8 @@ def save_contract_courses(args, form):
         if course not in contract.courses:
             enrollment = Enrollment(course_id=course_id, contract_id=contract_id)
             db.session.add(enrollment)
+            send_initial_lessons(contract, course)
+
     if form.get('action_type') == 'remove_course':
         if course in contract.courses:
             enrollments = Enrollment.query.filter_by(course_id=course_id, contract_id=contract_id).all()
