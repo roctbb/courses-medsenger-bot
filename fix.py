@@ -13,6 +13,6 @@ with app.app_context():
         enrollment = Enrollment.query.filter_by(contract_id=contract_id, course_id=4).first()
 
         if enrollment:
-            enrollment.created_on = enrollment.created_on + timedelta(days=21)
+            enrollment.created_on = enrollment.created_on - timedelta(days=21)
             print(f"fixed {contract_id}")
     db.session.commit()
