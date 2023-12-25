@@ -48,5 +48,5 @@ with app.app_context():
                     enrollment.created_on = start_date
                     print(f"Will set start date to {start_date} for course {enrollment.course_id}")
 
-        print()
-        print()
+            print()
+            print()
