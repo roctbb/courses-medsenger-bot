@@ -29,7 +29,7 @@ with app.app_context():
                     continue
                 break
 
-            last_index = min(0, index - 1)
+            last_index = max(0, index - 1)
             print("last stopped enrollment:", last_index)
 
             for index, enrollment in enumerate(incomplete_enrollments):
