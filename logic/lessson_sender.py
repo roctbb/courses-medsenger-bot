@@ -32,7 +32,7 @@ def send_lesson(contract, lesson, with_test=True):
         medsenger_api.send_message(contract.id, "Ответьте на вопросы, чтобы получить баллы.", only_patient=True,
                                    action_name="Ответить", action_link=f'tasks/{lesson.id}', action_onetime=True)
 
-    db.session.add(SentLesson(contract_id=contract.id, lesson_id=lesson.id))
+    db.session.add(SentLesson(contract_id=contract.id, lesson_id=lesson.id, course_id=lesson.course_id))
 
 
 def send_actual_lessons(app):
@@ -46,31 +46,30 @@ def send_actual_lessons(app):
                 if enrollment.diploma_received:
                     continue
 
-                current_day = (datetime.now() - enrollment.created_on).days
-                print("current_day:", current_day)
-
-                if current_day == 0:
-                    continue
-
                 course = enrollment.course
-
                 if not enrollment.points:
                     enrollment.points = 0
 
-                if len(list(filter(lambda sl: sl.course_id == course.id, contract.sent_lessons))) == len(course.lessons):
+                if len(enrollment.get_sent_lessons()) == len(course.lessons):
                     print("All lessons sent")
+                    enrollment.completed = True
 
-                    if course.diploma_points:
+                if enrollment.completed:
+                    if not enrollment.diploma_received and course.diploma_points:
                         if course.diploma_points <= enrollment.points:
                             print("Sending diploma")
                             send_diploma(enrollment)
-                else:
-                    actual_lessons = [lesson for lesson in
-                                      Lesson.query.filter_by(course_id=course.id, day=current_day).all() if
-                                      lesson not in contract.sent_lessons]
+                    continue
 
-                    for lesson in actual_lessons:
-                        send_lesson(contract, lesson)
+                current_day = (datetime.now() - enrollment.created_on).days
+                print("current_day:", current_day)
+
+                actual_lessons = [lesson for lesson in
+                                  Lesson.query.filter_by(course_id=course.id, day=current_day).all() if
+                                  lesson not in contract.sent_lessons]
+
+                for lesson in actual_lessons:
+                    send_lesson(contract, lesson)
 
         db.session.commit()
 
