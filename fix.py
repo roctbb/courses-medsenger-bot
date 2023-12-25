@@ -20,7 +20,7 @@ with app.app_context():
             first_enrollment = incomplete_enrollments[0]
             print("first enrollment:", first_enrollment.course_id)
 
-            last_sent_lesson = first_enrollment.sent_lessons[-1]
+            last_sent_lesson = first_enrollment.get_sent_lessons()[-1]
             print("last sent lesson:", last_sent_lesson.to_dict())
 
 

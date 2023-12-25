@@ -31,6 +31,9 @@ class Enrollment(db.Model):
             }
         }
 
+    def get_sent_lessons(self):
+        return list(filter(lambda sl: sl.course_id == self.course_id, self.contract.sent_lessons))
+
 
 class SentLesson(db.Model):
     __tablename__ = 'contract_lesson'
