@@ -37,7 +37,7 @@ with app.app_context():
                     enrollment.completed = True
                     print(f"Will mark course {enrollment.course_id} as completed")
 
-                if index == last_index:
+                elif index == last_index:
                     sent_count = len(enrollment.get_sent_lessons())
                     start_date = datetime.now() - timedelta(days=sent_count)
                     enrollment.created_on = start_date
