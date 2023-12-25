@@ -6,7 +6,7 @@ with app.app_context():
         if datetime.now() - timedelta(days=21) < contract.created_on:
             continue
 
-        incomplete_enrollments = list(filter(lambda e: not e.completed and e.created_at, contract.enrollments))
+        incomplete_enrollments = list(filter(lambda e: not e.completed, contract.enrollments))
 
         if incomplete_enrollments:
             incomplete_enrollments.sort(key=lambda e: e.course_id)
