@@ -1,6 +1,9 @@
 from models import *
 from datetime import timedelta
 
+def is_empty(enrollment):
+    return len(enrollment.get_sent_lessons()) == 0
+
 with app.app_context():
     contracts = Contract.query.all()
     contracts.sort(key=lambda contract:contract.id)
@@ -19,14 +22,10 @@ with app.app_context():
             print(f"found incomplete enrollments:",
                   list(map(lambda ie: ie.course_id, incomplete_enrollments)))
 
-            first_enrollment = incomplete_enrollments[0]
-            print("first enrollment:", first_enrollment.course_id)
+            for index, enrollment in enumerate(incomplete_enrollments):
+                if not is_empty(enrollment):
+                    continue
 
-            sent_lessons = first_enrollment.get_sent_lessons()
-
-            try:
-                last_sent_lesson = sent_lessons[-1]
-            except:
-                pass
+            print("first empty enrollment:", index)
 
 
