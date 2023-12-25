@@ -36,3 +36,17 @@ with app.app_context():
                 if index < last_index:
                     enrollment.completed = True
                     print(f"Will mark course {enrollment.course_id} as completed")
+
+                if index == last_index:
+                    sent_count = len(enrollment.get_sent_lessons())
+                    start_date = datetime.now() - timedelta(days=sent_count)
+                    enrollment.created_on = start_date
+                    print(f"Will set start date to {start_date} for course {enrollment.course_id}")
+
+                else:
+                    start_date += timedelta(days=21)
+                    enrollment.created_on = start_date
+                    print(f"Will set start date to {start_date} for course {enrollment.course_id}")
+
+        print()
+        print()
