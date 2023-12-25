@@ -3,12 +3,9 @@ from models import *
 from datetime import timedelta
 
 with app.app_context():
-    for sl in SentLesson.query.all():
-        sl.course_id = sl.lesson.course_id
+    for contract in Contract.query.all():
+        incomplete_enrollments = list(filter(lambda e: not e.completed, contract.enrollments))
 
-    for enrollment in Enrollment.query.all():
-        contract = enrollment.contract
-        if len(list(filter(lambda sl: sl.course_id == enrollment.course_id, contract.sent_lessons))) >= len(enrollment.course.lessons) - 1:
-            enrollment.completed = True
+        incomplete_enrollments.sort(key=lambda e: e.course_id)
 
-    db.session.commit()
+        print(f"found incomplete enrollments for contract {contract.id}:", list(map(lambda ie: ie.course_id, incomplete_enrollments)))
