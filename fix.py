@@ -8,7 +8,7 @@ with app.app_context():
 
     for enrollment in Enrollment.query.all():
         contract = enrollment.contract
-        if len(filter(lambda sl: sl.course_id == enrollment.course_id, contract.sent_lessons)) >= len(enrollment.course.lessons) - 1:
+        if len(list(filter(lambda sl: sl.course_id == enrollment.course_id, contract.sent_lessons))) >= len(enrollment.course.lessons) - 1:
             enrollment.completed = True
 
     db.session.commit()

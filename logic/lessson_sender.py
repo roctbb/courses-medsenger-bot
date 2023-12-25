@@ -57,7 +57,7 @@ def send_actual_lessons(app):
                 if not enrollment.points:
                     enrollment.points = 0
 
-                if len(filter(lambda sl: sl.course_id == course.id, contract.sent_lessons)) == len(course.lessons):
+                if len(list(filter(lambda sl: sl.course_id == course.id, contract.sent_lessons))) == len(course.lessons):
                     print("All lessons sent")
 
                     if course.diploma_points:
