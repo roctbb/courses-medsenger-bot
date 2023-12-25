@@ -36,6 +36,7 @@ class SentLesson(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     lesson_id = db.Column(db.Integer, db.ForeignKey('lesson.id', ondelete='CASCADE'))
+    course_id = db.Column(db.Integer, db.ForeignKey('course.id', ondelete='CASCADE'))
     contract_id = db.Column(db.Integer, db.ForeignKey('contract.id', ondelete='CASCADE'))
     created_on = db.Column(db.DateTime, server_default=db.func.now())
 
