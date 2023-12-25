@@ -24,7 +24,6 @@ with app.app_context():
 
             try:
                 last_sent_lesson = sent_lessons[-1]
-                print("last sent lesson:", last_sent_lesson.to_dict())
             except:
                 pass
 
