@@ -37,15 +37,33 @@ def init(data):
     else:
         contract.active = True
 
-    course_ids = request.json.get('params', {}).get('courses')
+    params = request.json.get('params', {})
 
-    if course_ids:
-        for course_id in course_ids.split(','):
-            course = Course.query.filter_by(id=course_id).first()
+    attached_courses = {}
 
-            if course and course not in contract.courses:
-                db.session.add(Enrollment(contract_id=contract.id, course_id=course.id))
-                send_initial_lessons(contract, course)
+    for param_key, param_value in params.items():
+        try:
+            if param_key == "courses":
+                for course_id in param_value.split(','):
+                    attached_courses[course_id] = datetime.now()
+            if "course_" in param_key and "_date" in param_key:
+                _, course_id, _ = param_key.split('_')
+                attached_courses[course_id] = datetime.strptime(param_value, '%Y-%m-%d')
+        except Exception as e:
+            log(e)
+
+    for course_id, created_on in attached_courses.items():
+        course = Course.query.filter_by(id=course_id).first()
+
+        if not course:
+            continue
+
+        if course not in contract.courses:
+            db.session.add(Enrollment(contract_id=contract.id, course_id=course.id, created_on=created_on))
+            send_initial_lessons(contract, course)
+        else:
+            enrollment = Enrollment.query.filter_by(contract_id=contract.id, course_id=course.id).first()
+            enrollment.created_on = created_on
 
     db.session.commit()
 

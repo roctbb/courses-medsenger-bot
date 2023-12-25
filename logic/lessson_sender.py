@@ -76,7 +76,7 @@ def send_actual_lessons(app):
 
 def send_initial_lessons(contract, course):
     actual_lessons = [lesson for lesson in
-                      Lesson.query.filter_by(course_id=course.id, day=0).all()]
+                      Lesson.query.filter_by(course_id=course.id, day=0).all() if lesson not in contract.sent_lessons]
 
     for lesson in actual_lessons:
         send_lesson(contract, lesson)
