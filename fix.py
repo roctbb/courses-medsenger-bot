@@ -2,7 +2,9 @@ from models import *
 from datetime import timedelta
 
 with app.app_context():
-    for contract in Contract.query.all():
+    contracts = Contract.query.all()
+    contracts.sort(key=lambda contract:contract.id)
+    for contract in contracts:
         if datetime.now() - timedelta(days=21) < contract.created_on:
             continue
 
