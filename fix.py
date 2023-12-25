@@ -51,4 +51,4 @@ with app.app_context():
             print()
             print()
 
-        db.session.commit()
+    db.session.commit()
