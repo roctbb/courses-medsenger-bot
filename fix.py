@@ -6,7 +6,7 @@ def is_empty(enrollment):
 
 with app.app_context():
     contracts = Contract.query.all()
-    contracts.sort(key=lambda contract:contract.id)
+    contracts.sort(key=lambda contract: contract.id)
     for contract in contracts:
         if datetime.now() - timedelta(days=21) < contract.created_on:
             continue
@@ -25,6 +25,7 @@ with app.app_context():
             for index, enrollment in enumerate(incomplete_enrollments):
                 if not is_empty(enrollment):
                     continue
+                break
 
             print("first empty enrollment:", index)
 
