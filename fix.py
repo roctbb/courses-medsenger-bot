@@ -33,6 +33,7 @@ with app.app_context():
             print("last stopped enrollment:", last_index)
 
             for index, enrollment in enumerate(incomplete_enrollments):
+                print(index)
                 if index < last_index:
                     enrollment.completed = True
                     print(f"Will mark course {enrollment.course_id} as completed")
