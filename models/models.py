@@ -134,6 +134,9 @@ class Lesson(db.Model):
 
     course_id = db.Column(db.Integer, db.ForeignKey('course.id'))
 
+    sents = db.relationship('SentLesson', backref=backref('lesson', uselist=False),
+                                  lazy=True, viewonly=True)
+
     def to_dict(self):
         return {
             "id": self.id,
