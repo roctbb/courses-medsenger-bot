@@ -16,7 +16,8 @@ class Enrollment(db.Model):
     points = db.Column(db.Integer, default=0)
     created_on = db.Column(db.DateTime, server_default=db.func.now())
     updated_on = db.Column(db.DateTime, server_default=db.func.now(), server_onupdate=db.func.now())
-    diploma_received = db.Column(db.Boolean)
+    diploma_received = db.Column(db.Boolean, server_default="false")
+    completed = db.Column(db.Boolean, server_default="false")
 
 
     def to_dict(self):
