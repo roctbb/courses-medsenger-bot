@@ -1,8 +1,10 @@
 from models import *
 from datetime import timedelta
 
+
 def is_empty(enrollment):
     return len(enrollment.get_sent_lessons()) == 0
+
 
 with app.app_context():
     contracts = Contract.query.all()
@@ -27,6 +29,10 @@ with app.app_context():
                     continue
                 break
 
-            print("first empty enrollment:", index)
+            last_index = min(0, index - 1)
+            print("last stopped enrollment:", last_index)
 
-
+            for index, enrollment in enumerate(incomplete_enrollments):
+                if index < last_index:
+                    enrollment[index].completed = True
+                    print(f"Will mark course {enrollment[index].course_id} as completed")
