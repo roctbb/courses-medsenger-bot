@@ -17,6 +17,6 @@ with app.app_context():
             last_date += timedelta(days=21)
             print(f"Planning to add enrollment for course {course_id} for contract {contract.id} starting at {last_date}")
             enrollment = Enrollment(course_id=course_id, created_on=last_date, contract_id=contract.id, completed=False)
-            contract.enrollments.append(enrollment)
+            db.session.add(enrollment)
 
     db.session.commit()
