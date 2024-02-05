@@ -13,10 +13,10 @@ with app.app_context():
         last_enrollment = enrollments[-1]
         last_date = last_enrollment.created_on
 
-        for course_id in range(last_enrollment.course_id, 8):
+        for course_id in range(last_enrollment.course_id + 1, 8):
             last_date += timedelta(days=21)
             print(f"Planning to add enrollment for course {course_id} for contract {contract.id} starting at {last_date}")
             enrollment = Enrollment(course_id=course_id, created_on=last_date, contract_id=contract.id, completed=False)
             contract.enrollments.append(enrollment)
 
-    # db.session.commit()
+    db.session.commit()
